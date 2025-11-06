@@ -1,0 +1,178 @@
+Rollin2/
+├── assets/
+│   ├── audio/                      # Music and sound effects
+│   │   ├── Jump.wav
+│   │   ├── Level_2.wav
+│   │   ├── playerhit.mp3
+│   │   └── rollin1/
+│   │       ├── hitsound.wav
+│   │       └── win.wav
+│   ├── backgrounds/                # Parallax background layers
+│   │   └── level_1/
+│   │       ├── forest_back.png
+│   │       ├── forest_long.png
+│   │       ├── forest_mid.png
+│   │       ├── forest_moon.png
+│   │       ├── forest_mountain.png
+│   │       ├── forest_short.png
+│   │       └── forest_sky.png
+│   ├── fonts/
+│   │   └── upheavtt.ttf
+│   ├── maps/                       # Tiled map files (.tmj JSON format)
+│   │   └── level_1.tmj
+│   ├── sprites/                    # Entity sprites
+│   │   ├── bat.png
+│   │   ├── coin_blue.png
+│   │   ├── hearts.png
+│   │   ├── platform_horizontal.png
+│   │   ├── platform_vertical.png
+│   │   ├── playerSprites.png
+│   │   ├── slime.png
+│   │   ├── spike.png
+│   │   ├── wasp_black.png
+│   │   ├── wasp_orange.png
+│   │   ├── wasp_red.png
+│   │   └── wasp_yellow.png
+│   └── tilesets/                   # Tileset graphics
+│       └── level_1_tileset.png
+│
+├── src/
+│   ├── entities/                   # Game entities
+│   │   ├── __init__.py
+│   │   ├── bat.py                  # Flying zigzag enemy
+│   │   ├── coin.py                 # Collectible coins
+│   │   ├── enemy.py                # Base enemy class
+│   │   ├── entity.py               # Base entity class
+│   │   ├── player.py               # Player with physics
+│   │   ├── slime.py                # Ground patrol enemy
+│   │   ├── spike.py                # Static hazard
+│   │   └── wasp.py                 # Sin wave enemy (4 colors)
+│   │
+│   ├── game_states/                # Game state machine
+│   │   ├── __init__.py
+│   │   ├── game_state.py           # Base state class
+│   │   ├── game_state_manager.py   # State manager
+│   │   ├── level_state.py          # Base level class
+│   │   ├── menu_state.py           # Main menu
+│   │   └── rollin2/
+│   │       └── level_1_state.py    # Level 1 implementation
+│   │
+│   ├── graphics/                   # Rendering systems
+│   │   ├── __init__.py
+│   │   └── animation.py            # Sprite animation
+│   │
+│   ├── handlers/                   # Game systems
+│   │   ├── __init__.py
+│   │   ├── audio_manager.py        # Music & sound effects
+│   │   ├── input_handler.py        # Keyboard input
+│   │   └── player_collision_handler.py  # Player collision logic
+│   │
+│   ├── tilemap/                    # Map system
+│   │   ├── __init__.py
+│   │   ├── horizontal_platform.py  # Horizontal moving platform
+│   │   ├── tile.py                 # Individual tile
+│   │   ├── tilemap.py              # Tiled map loader
+│   │   └── vertical_platform.py    # Vertical moving platform
+│   │
+│   ├── __init__.py
+│   └── game.py                     # Main game loop (entry point)
+│
+├── venv/                           # Virtual environment (optional)
+├── .gitignore
+├── PROJECT_STRUCTURE.txt           # This file
+├── QUICKSTART.md                   # Quick start guide
+├── README.md                       # Full documentation
+├── requirements.txt                # Python dependencies (pygame)
+└── run.sh                          # Launcher script
+
+================================
+Key Systems:
+================================
+
+GAME LOOP (game.py):
+- 60 FPS with delta time (16.67ms per frame)
+- 320x240 internal resolution, scaled 2x to 640x480
+- Double buffering for smooth rendering
+
+STATE MACHINE (game_state_manager.py):
+- Manages menu, levels, pause states
+- Tracks global state: score, lives
+- Lazy state initialization
+
+LEVEL SYSTEM (level_state.py):
+- Base class for all levels
+- Tiled map integration
+- Entity spawning from map layers
+- Parallax backgrounds
+- HUD rendering
+- Death/win screens
+
+PLAYER (player.py):
+- Physics: gravity, jumping, gliding
+- HP system (3 hearts)
+- Invincibility frames on hit
+- Moving platform interaction
+- Underwater physics support
+
+ENEMIES:
+- Slime: Patrols left/right between walls
+- Bat: Flies in zigzag pattern (up-right, down-right)
+- Wasp: Activates near player, flies left in sin wave (4 color variants)
+
+TILEMAP (tilemap.py):
+- Loads Tiled JSON (.tmj) format
+- 32x32 pixel tiles
+- 4-corner collision detection
+- Entity position extraction from layers
+- Camera offset rendering
+
+MOVING PLATFORMS:
+- Vertical and horizontal
+- Defined in Tiled with properties (speed, distance)
+- Player tracking (moves with platform)
+- Enemies can stand on platforms
+
+AUDIO (audio_manager.py):
+- Background music with looping/fading
+- Sound effects with volume control
+- Pygame mixer integration
+
+================================
+Entity Spawning (Data-Driven):
+================================
+
+Entities spawn from Tiled map layers:
+- Collision: Solid tiles for collision
+- Coin: Coin spawn positions
+- Spike: Spike hazard positions
+- Slime: Ground enemy spawns
+- Bat: Flying enemy spawns
+- Wasp: Sin wave enemy spawns (tile ID = color)
+- VerticalPlatform: Vertical moving platforms (properties: speed, distance)
+- HorizontalPlatform: Horizontal moving platforms (properties: speed, distance)
+
+================================
+Physics Constants:
+================================
+
+Player Movement:
+- move_speed = 0.3
+- max_speed = 1.6
+- stop_speed = 0.4
+
+Gravity:
+- fall_speed = 0.15
+- max_fall_speed = 4.0
+
+Jumping:
+- jump_start = -4.8
+- stop_jump_speed = 0.3
+
+Gliding:
+- glide_scale = 0.1 (90% fall speed reduction)
+
+Underwater (optional):
+- underwater_move_speed = 0.15
+- underwater_max_speed = 0.8
+- underwater_fall_speed = 0.05
+- underwater_max_fall_speed = 1.5
