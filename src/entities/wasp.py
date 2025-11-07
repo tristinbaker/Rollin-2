@@ -91,7 +91,6 @@ class Wasp(Enemy):
             if distance_to_player <= self.activation_distance:
                 self.state = "flying"
                 self.time = 0
-                print(f"Wasp activated at x={self.x}")
 
         elif self.state == "flying":
             # Fly left in a sin wave

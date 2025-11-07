@@ -2,7 +2,6 @@
 HorizontalMovingPlatform - A platform that moves left and right horizontally
 """
 import pygame
-import os
 
 
 class HorizontalMovingPlatform:

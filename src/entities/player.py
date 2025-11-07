@@ -63,6 +63,8 @@ class Player:
         self.hp = 3
         self.invincible_timer = 0  # Invincibility frames after taking damage
         self.invincible_duration = 1000  # 1 second of invincibility
+        self.lava_death_timer = 0  # Timer for delayed lava death
+        self.lava_sound_played = False  # Track if lava sound has been played
 
         # Collision flags
         self.top_left = False
@@ -145,6 +147,13 @@ class Player:
         if self.invincible_timer > 0:
             self.invincible_timer -= dt
 
+        # Update lava death timer
+        if self.lava_death_timer > 0:
+            self.lava_death_timer -= dt
+            if self.lava_death_timer <= 0:
+                self.hp = 0
+                self.dead = True
+
         # FIRST: Move with vertical platform if we were on one last frame
         # This prevents falling through when platform moves down faster than gravity
         if self.last_platform and hasattr(self.last_platform, 'start_y'):
@@ -163,34 +172,10 @@ class Player:
                 platform_velocity_y = self.last_platform.move_speed * (dt / 1000.0) * self.last_platform.direction
                 self.y += platform_velocity_y
 
-        # Get physics multipliers based on underwater state
-        if self.underwater:
-            move_mult = 0.5
-            max_speed_mult = 0.6
-            stop_mult = 0.3
-        else:
-            move_mult = 1.0
-            max_speed_mult = 1.0
-            stop_mult = 1.0
-
-        # Horizontal movement
-        if self.left:
-            self.dx -= self.move_speed * move_mult
-            if self.dx < -self.max_speed * max_speed_mult:
-                self.dx = -self.max_speed * max_speed_mult
-        elif self.right:
-            self.dx += self.move_speed * move_mult
-            if self.dx > self.max_speed * max_speed_mult:
-                self.dx = self.max_speed * max_speed_mult
-        else:
-            if self.dx > 0:
-                self.dx -= self.stop_speed * stop_mult
-                if self.dx < 0:
-                    self.dx = 0
-            elif self.dx < 0:
-                self.dx += self.stop_speed * stop_mult
-                if self.dx > 0:
-                    self.dx = 0
+        # Get physics multipliers and apply horizontal movement
+        move_mult, max_speed_mult, stop_mult = self.physics_handler.get_physics_multipliers()
+        on_horizontal_platform = self.last_platform and hasattr(self.last_platform, 'start_x')
+        self.physics_handler.apply_horizontal_movement(move_mult, max_speed_mult, stop_mult, on_horizontal_platform)
 
         # Handle horizontal (X) collision
         next_x = self.x + self.dx
@@ -443,12 +428,31 @@ class Player:
 
     def hit_spike(self, spike):
         """Check if player hit a spike or enemy"""
-        # Use larger buffer for collision detection (24 pixels for slimes, 16 for spikes)
-        buffer = 24
-        return (spike.get_x() <= (self.x + buffer) and
-                spike.get_x() >= (self.x - buffer) and
-                spike.get_y() <= (self.y + buffer) and
-                spike.get_y() >= (self.y - buffer))
+        # Use collision dimensions if available (for accurate spike collision)
+        if hasattr(spike, 'collision_width') and hasattr(spike, 'collision_height'):
+            offset_x = getattr(spike, 'collision_offset_x', 0)
+            spike_left = spike.get_x() - spike.collision_width / 2 + offset_x
+            spike_right = spike.get_x() + spike.collision_width / 2 + offset_x
+            spike_top = spike.get_y() - spike.collision_height / 2
+            spike_bottom = spike.get_y() + spike.collision_height / 2
+
+            player_left = self.x - self.cwidth / 2
+            player_right = self.x + self.cwidth / 2
+            player_top = self.y - self.cheight / 2
+            player_bottom = self.y + self.cheight / 2
+
+            # AABB collision check
+            return (player_right > spike_left and
+                    player_left < spike_right and
+                    player_bottom > spike_top and
+                    player_top < spike_bottom)
+        else:
+            # Fallback for enemies without collision dimensions
+            buffer = 24
+            return (spike.get_x() <= (self.x + buffer) and
+                    spike.get_x() >= (self.x - buffer) and
+                    spike.get_y() <= (self.y + buffer) and
+                    spike.get_y() >= (self.y - buffer))
 
     def take_damage(self, spike_x=None):
         """Take damage from a spike"""
@@ -463,12 +467,20 @@ class Player:
                     self.dx = -3  # Knock left
                 else:
                     self.dx = 3   # Knock right
-                self.dy = -2  # Small upward bounce
 
+            # Check if dead
             if self.hp <= 0:
                 self.dead = True
             return True
         return False
+
+    def touch_lava(self):
+        """Start the delayed death sequence from lava"""
+        if self.lava_death_timer == 0:
+            self.lava_death_timer = 150  # 200ms delay before death
+            self.lava_sound_played = False  # Reset sound flag
+            return True  # Signal that sound should be played
+        return False  # Already touched lava, don't play sound again
 
     def get_hp(self):
         return self.hp

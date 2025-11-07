@@ -1,12 +1,12 @@
 { "compressionlevel":-1,
- "height":50,
+ "height":35,
  "infinite":false,
  "layers":[
         {
          "compression":"zlib",
-         "data":"eJzt3DEKhDAQBVDd7XQ7d+9\/VacJiCgSCLMa3oPfTDEEQkj3hwGAOxojr8j7YsYzTZE58tnMlsg38vvLiWjp6H7ph7fKXqv\/+WxP7Zy2Wr35sz21cwAAAAAAAAAAAAAAAAAAAAAAoD+lVyojuqvylY7CjOhBzFd6wzKimyzXCu+pBWs=",
+         "data":"eJzt1dEJgCAUQFFXyVokapGoRdo8I6OIPgUjzoEL4teDhxgCAAAAAAAAAAAAAAAAAPA3TSqm2lRXeRbK61NDbqw8C+Xt+51zS+VZKG8Kx26HR\/zDGq73e+\/8k9t8jre7+BLftAH6Qgjc",
          "encoding":"base64",
-         "height":50,
+         "height":35,
          "id":1,
          "name":"Static Platforms",
          "opacity":1,
@@ -18,11 +18,11 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztyTEBAAAIw7DJwr8yLIyPIznbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAPhkytY8AG4W7a0AqQ==",
+         "data":"eJzt0cEJACAQA8HrXq3EUmxLfzagCOcM5B\/YCAAAAAAAAAAAAAAAAAAgs7JW19rrI1zRYzcmnxEa\/0Dj\/PrrAxwxARWHCCk=",
          "encoding":"base64",
-         "height":50,
-         "id":3,
-         "name":"Spikes",
+         "height":35,
+         "id":14,
+         "name":"Static Sloped Platforms",
          "opacity":1,
          "type":"tilelayer",
          "visible":true,
@@ -32,9 +32,51 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJzt3NENABAQREENowR07oogFzKTvP+tYEsBAADglBq1qGcP4YoRzWgl7wAAAAAAAAAAAAAAAAAAAAD4jd+Ov\/ntAADgNRsYMgWV",
+         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
          "encoding":"base64",
-         "height":50,
+         "height":35,
+         "id":3,
+         "name":"Spike Trap",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":120,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "compression":"zlib",
+         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
+         "encoding":"base64",
+         "height":35,
+         "id":13,
+         "name":"Hearts",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":120,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "compression":"zlib",
+         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
+         "encoding":"base64",
+         "height":35,
+         "id":10,
+         "name":"Lava",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":120,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "compression":"zlib",
+         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
+         "encoding":"base64",
+         "height":35,
          "id":4,
          "name":"Vertical Moving Platforms",
          "opacity":1,
@@ -46,9 +88,9 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJzt18EJgEAMRcF0pd6iN7X\/fkwLIktwmYF3\/5DDshEA\/N1SrdXWPYQhzuqq7u4hAHzmzZ5bVnt1NO9gjAz3nVmG+87MnwoAAAAAAAAAAAAAAAAAAAAAAHjrAU91BVY=",
+         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
          "encoding":"base64",
-         "height":50,
+         "height":35,
          "id":5,
          "name":"Horizontal Moving Platforms",
          "opacity":1,
@@ -60,9 +102,9 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJzt1TENAAAIBLH37wh3SCBMhKRVcNslwHd1HQAAjDa\/9nYAAAAAAAAAAAAAAAAAAAAAAAAAgDsNOQQCLA==",
+         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
          "encoding":"base64",
-         "height":50,
+         "height":35,
          "id":8,
          "name":"Coin",
          "opacity":1,
@@ -74,9 +116,9 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztzkERACAMA7D5FwXDGSp6\/SQKMgPQ8doBorYdIOq2A0SddgAAAAAAAAAAAAAAAAAAAAAAAAAAAIo+GW0C\/w==",
+         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
          "encoding":"base64",
-         "height":50,
+         "height":35,
          "id":9,
          "name":"Wasp",
          "opacity":1,
@@ -88,9 +130,9 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztzgENAAAIA6D3L2NFY3w6SEACfDTtAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMBBC9QvALA=",
+         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
          "encoding":"base64",
-         "height":50,
+         "height":35,
          "id":7,
          "name":"Slime",
          "opacity":1,
@@ -102,9 +144,9 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztwQENAAAAwqD3T+3sARQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADddwAAB",
+         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
          "encoding":"base64",
-         "height":50,
+         "height":35,
          "id":6,
          "name":"Bat",
          "opacity":1,
@@ -114,7 +156,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":10,
+ "nextlayerid":15,
  "nextobjectid":1,
  "orientation":"orthogonal",
  "renderorder":"right-down",
@@ -123,23 +165,35 @@
  "tilesets":[
         {
          "firstgid":1,
-         "source":"..\/tilesets\/forest.tsx"
+         "source":"forest.tsx"
         }, 
         {
-         "firstgid":163,
+         "firstgid":1313,
          "source":"..\/tilesets\/bat.tsx"
         }, 
         {
-         "firstgid":175,
+         "firstgid":1325,
          "source":"..\/tilesets\/slime.tsx"
         }, 
         {
-         "firstgid":182,
+         "firstgid":1332,
          "source":"..\/tilesets\/coin.tsx"
         }, 
         {
-         "firstgid":190,
+         "firstgid":1340,
          "source":"..\/tilesets\/wasp_colors.tsx"
+        }, 
+        {
+         "firstgid":1344,
+         "source":"..\/tilesets\/traps.tsx"
+        }, 
+        {
+         "firstgid":1344,
+         "source":"..\/tilesets\/spikes.tsx"
+        }, 
+        {
+         "firstgid":1356,
+         "source":"..\/tilesets\/lava.tsx"
         }],
  "tilewidth":32,
  "type":"map",

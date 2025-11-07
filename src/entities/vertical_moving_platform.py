@@ -2,7 +2,6 @@
 VerticalMovingPlatform - A platform that moves up and down vertically
 """
 import pygame
-import os
 
 
 class VerticalMovingPlatform:

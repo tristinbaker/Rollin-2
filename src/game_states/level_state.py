@@ -10,6 +10,7 @@ from entities.slime import Slime
 from entities.bat import Bat
 from entities.wasp import Wasp
 from entities.coin import Coin
+from entities.lava import Lava
 from entities.vertical_moving_platform import VerticalMovingPlatform
 from entities.horizontal_moving_platform import HorizontalMovingPlatform
 
@@ -24,6 +25,7 @@ class LevelState(GameState):
         self.player = None
         self.coins = []
         self.spikes = []
+        self.lava = []
         self.enemies = []
         self.moving_platforms = []
         self.total_coins = 0
@@ -342,16 +344,17 @@ class LevelState(GameState):
             coin.set_position(x, y + y_offset)
             self.coins.append(coin)
 
-    def spawn_spikes_from_layer(self, layer_name="Spikes"):
+    def spawn_spikes_from_layer(self, layer_name="Spike Trap", y_offset=32):
         """Spawn spikes from a Tiled layer
 
         Args:
-            layer_name: Name of the Tiled layer containing spike positions (default: "Spikes")
+            layer_name: Name of the Tiled layer containing spike positions (default: "Spike Trap")
+            y_offset: Y position adjustment to make spikes sit on ground (default: 32, one tile)
         """
         spike_positions = self.tilemap.get_entity_positions_from_layer(layer_name)
         for x, y in spike_positions:
             spike = Spike(self.tilemap)
-            spike.set_position(x, y)
+            spike.set_position(x, y + y_offset)
             self.spikes.append(spike)
 
     def spawn_slimes_from_layer(self, layer_name="Slime", y_offset=32):
@@ -425,6 +428,38 @@ class LevelState(GameState):
             wasp.set_position(x, y)
             self.enemies.append(wasp)
 
+    def spawn_lava_from_layer(self, layer_name="Lava", y_offset=32):
+        """Spawn lava from a Tiled layer
+
+        The topmost lava in each column uses the top row animation (16px collision).
+        All other lava uses the bottom row animation (full 32px collision).
+
+        Args:
+            layer_name: Name of the Tiled layer containing lava positions (default: "Lava")
+            y_offset: Y position adjustment to make lava sit on ground (default: 32, one tile)
+        """
+        lava_positions = self.tilemap.get_entity_positions_from_layer(layer_name)
+
+        # Group lava by column (x coordinate) to identify top lava
+        columns = {}
+        for x, y in lava_positions:
+            if x not in columns:
+                columns[x] = []
+            columns[x].append(y)
+
+        # Sort each column to find the topmost lava
+        for x in columns:
+            columns[x].sort()
+
+        # Spawn lava
+        for x, y in lava_positions:
+            # Check if this is the topmost lava in its column
+            is_top = (y == columns[x][0])
+
+            lava = Lava(self.tilemap, is_top=is_top)
+            lava.set_position(x - 1, y + y_offset)
+            self.lava.append(lava)
+
     def spawn_vertical_platforms_from_layer(self, layer_name="Vertical Moving Platforms"):
         """Spawn vertical moving platforms from a Tiled layer
 
@@ -460,6 +495,97 @@ class LevelState(GameState):
             # Set previous state AFTER init() has been called
             if self.gsm.game_states[self.gsm.PAUSE_STATE]:
                 self.gsm.game_states[self.gsm.PAUSE_STATE].set_previous_state(current)
+
+    def handle_death_screen(self, target_state):
+        """
+        Handle death screen timer logic
+
+        Args:
+            target_state: The state to restart when timer expires
+
+        Returns:
+            bool: True if death screen is active, False otherwise
+        """
+        if self.death_screen_timer > 0:
+            self.death_screen_timer -= 16.67
+            if self.death_screen_timer <= 0:
+                self.gsm.lose_life()
+                self.gsm.set_score(self.level_start_score)
+                if self.gsm.get_lives() <= 0:
+                    self.gsm.set_lives(5)
+                    self.gsm.set_state(self.gsm.MENU_STATE)
+                else:
+                    self.gsm.set_state(target_state)
+            return True
+        return False
+
+    def handle_player_input(self):
+        """Handle common player input"""
+        input_handler = self.gsm.input_handler
+        self.player.set_left(input_handler.is_down(input_handler.LEFT) or input_handler.is_down(input_handler.A))
+        self.player.set_right(input_handler.is_down(input_handler.RIGHT) or input_handler.is_down(input_handler.D))
+        self.player.set_up(input_handler.is_down(input_handler.UP) or input_handler.is_down(input_handler.W))
+        self.player.set_down(input_handler.is_down(input_handler.DOWN) or input_handler.is_down(input_handler.S))
+        self.player.set_jumping(input_handler.is_down(input_handler.BUTTON3))
+        self.player.set_gliding(input_handler.is_down(input_handler.BUTTON4))
+
+    def update_coins(self):
+        """Update coins and check for collection"""
+        for coin in self.coins:
+            if self.player.got_coin(coin) and coin.is_on_screen:
+                self.total_coins += 1
+                self.gsm.add_score(100)
+                coin.player_got(self.gsm.audio_manager)
+            coin.update(16.67)
+
+    def check_win_condition(self, level_name="Level"):
+        """
+        Check if player has won and handle win state
+
+        Args:
+            level_name: Name of the level for display
+
+        Returns:
+            bool: True if win state is active, False otherwise
+        """
+        if self.player.has_won():
+            if not self.has_won:
+                self.has_won = True
+                if not self.win_sound_played:
+                    self.gsm.audio_manager.stop_music()
+                    self.gsm.audio_manager.play_sound("win")
+                    self.win_sound_played = True
+                    print(f"{level_name} Complete!")
+            if self.gsm.input_handler.is_pressed(self.gsm.input_handler.BUTTON1):
+                self.gsm.set_state(self.gsm.MENU_STATE)
+            return True
+        return False
+
+    def check_death_condition(self):
+        """Check if player died and start death screen"""
+        if self.player.is_dead():
+            if self.death_screen_timer == 0:
+                self.gsm.audio_manager.stop_music()
+                if "death" not in self.gsm.audio_manager.sound_effects:
+                    self.gsm.audio_manager.load_sound("death", "death.wav")
+                self.gsm.audio_manager.play_sound("death")
+                self.death_screen_timer = self.death_screen_duration
+            return True
+        return False
+
+    def draw_death_screen(self, surface):
+        """Draw death screen overlay"""
+        if self.death_screen_timer > 0:
+            overlay = pygame.Surface((320, 240))
+            overlay.set_alpha(180)
+            overlay.fill((0, 0, 0))
+            surface.blit(overlay, (0, 0))
+
+            font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../assets/fonts/upheavtt.ttf"))
+            death_font = pygame.font.Font(font_path, 48)
+            death_text = death_font.render("YOU DIED!", True, (255, 0, 0))
+            death_rect = death_text.get_rect(center=(160, 120))
+            surface.blit(death_text, death_rect)
 
     def update(self):
         """Update level logic (override in subclasses)"""
