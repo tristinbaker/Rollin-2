@@ -127,6 +127,13 @@ Rollin2/
 - Player tracking (moves player with platform)
 - Enemies can stand on platforms
 
+**Slope Collision System (`tilemap.py`, `player.py`)**
+- Static sloped platforms with 45-degree angle collision
+- Supports `right_slope` (high on left, slopes down to right) and `left_slope` (high on right, slopes down to left)
+- Tiles must have custom properties `right_slope="true"` or `left_slope="true"` in Tiled tileset
+- Uses separate "Static Sloped Platforms" layer for slope tiles
+- Smooth slope walking and landing for enhanced platformer feel
+
 **Audio (`audio_manager.py`)**
 - Background music with looping and fading
 - Sound effects with volume control
@@ -279,6 +286,7 @@ Rollin' 2 uses **Tiled Map Editor** for level design. Here's how to create a new
 
 2. **Add required layers:**
    - `Collision` - Tiles for collision detection
+   - `Static Sloped Platforms` - Sloped tiles for 45-degree angle collision
    - `Coin` - Coin spawn positions
    - `Spike` - Spike hazard positions
    - `Slime` - Slime enemy positions
@@ -309,6 +317,69 @@ Rollin' 2 uses **Tiled Map Editor** for level design. Here's how to create a new
            self.spawn_spikes_from_layer()
            # ... etc
    ```
+
+## Using Sloped Platforms
+
+The game now supports 45-degree angled slopes for enhanced platforming. Here's how to set them up:
+
+### Setting Up Slope Tiles in Tiled
+
+1. **Open your tileset file** (e.g., `forest.tsx`) in Tiled
+2. **Select a tile** you want to use as a slope
+3. **Add custom properties** in the Properties panel:
+   - For slopes going down from left to right: Add `right_slope` (boolean) = `true`
+   - For slopes going down from right to left: Add `left_slope` (boolean) = `true`
+4. **Save the tileset**
+
+### Using Slopes in Maps
+
+1. **Place slope tiles** in any collision layer (e.g., "Static Platforms", "Collision", etc.)
+2. **Mix with regular tiles** - you can have both slope and regular collision tiles in the same layer
+3. **The collision system will automatically:**
+   - Treat tiles with slope properties as triangular slopes (no rectangular collision)
+   - Treat tiles without slope properties as rectangular blocks
+   - Detect when the player should be walking on slopes
+   - Smoothly adjust the player's Y position to follow the slope angle
+   - Allow the player to jump while on slopes
+   - Handle transitions from flat ground to slopes seamlessly
+
+### Slope Types
+
+- **Right Slope** (`right_slope="true"`): Triangle shape high on the left, sloping down to the right
+- **Left Slope** (`left_slope="true"`): Triangle shape high on the right, sloping down to the left
+
+### Technical Notes
+
+- Slopes work at exactly 45 degrees (1:1 ratio)
+- Players can walk up and down slopes smoothly
+- Jumping and landing on slopes works correctly
+- Slopes are processed before regular tile collision for smooth movement
+- **Slope tiles do NOT act as rectangular blocks** - they only provide triangular slope collision
+- **Tiles with slope properties are automatically excluded from rectangular collision**
+- **Mixed layers supported** - you can have both slope and regular collision tiles in the same layer
+- Only tiles with `right_slope="true"` or `left_slope="true"` properties will have slope collision
+- Regular tiles (without slope properties) in collision layers act as rectangular blocks
+
+### Common Issues and Solutions
+
+**Problem: Slope tiles are acting like solid rectangular blocks**  
+- **Solution**: Ensure slope tiles have the correct custom properties (`right_slope="true"` or `left_slope="true"`)
+- The system automatically treats tiles with slope properties as NORMAL for rectangular collision
+- Slope tiles can be in the same layer as regular collision tiles (e.g., "Static Platforms")
+
+**Problem: Player falls through slopes**
+- **Solution**: Verify that slope tiles have the correct custom properties (`right_slope="true"` or `left_slope="true"`)
+- Check that the tile is in the "Static Sloped Platforms" layer with the correct name (case-insensitive)
+
+**Problem: Slopes don't look like 45-degree triangles**
+- **Solution**: This is a visual issue - make sure your slope tile graphics actually show triangular slopes
+- The collision works correctly regardless of the visual appearance
+
+**Problem: "Ledges" when going up/down slopes (player becomes airborne)**
+- **✅ FIXED**: Enhanced boundary overlap detection eliminates ledge effects at tile boundaries
+- **✅ FIXED**: Improved collision mathematics provide seamless slope transitions  
+- **✅ FIXED**: Players can now traverse slopes smoothly in both directions without mid-air jumps
+- **Note**: 4px vertical change per 4px horizontal movement is correct physics for 45-degree slopes
 
 ## Physics Constants
 

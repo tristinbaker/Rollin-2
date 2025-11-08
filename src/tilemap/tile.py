@@ -8,6 +8,8 @@ class Tile:
     # Tile types
     NORMAL = 0
     BLOCKED = 1
+    LEFT_SLOPE = 2   # Slopes down from left to right (high on left, low on right)
+    RIGHT_SLOPE = 3  # Slopes down from right to left (high on right, low on left)
 
     def __init__(self, image, tile_type):
         """

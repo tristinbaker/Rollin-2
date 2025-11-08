@@ -46,7 +46,8 @@ class TileMap:
         self.tiles = []  # 2D array: [row][col] where row 0=NORMAL, row 1=BLOCKED
 
         # Tiled-specific data
-        self.tiled_tiles = {}  # For Tiled: {tile_id: {'image': surface, 'type': NORMAL/BLOCKED}}
+        self.tiled_tiles = {}  # For Tiled: {tile_id: {'image': surface, 'type': NORMAL/BLOCKED, 'slope_type': NONE/LEFT/RIGHT}}
+        self.slope_layer_map = []  # Separate 2D array for slope tiles from "Static Sloped Platforms" layer
 
         # Drawing optimization
         self.row_offset = 0
@@ -212,11 +213,17 @@ class TileMap:
 
             # Load tile layer data and track collision layers
             collision_layer_names = ['platforms', 'collision', 'solid', 'ground']
+            slope_layer_names = ['static sloped platforms', 'sloped platforms', 'slopes']
+            
+            # Initialize slope layer map with zeros
+            self.slope_layer_map = [[0 for _ in range(self.num_cols)] for _ in range(self.num_rows)]
+            
             if 'layers' in data:
                 for layer in data['layers']:
                     if layer['type'] == 'tilelayer' and layer.get('visible', True):
                         layer_name = layer.get('name', '').lower()
                         is_collision_layer = any(name in layer_name for name in collision_layer_names)
+                        is_slope_layer = any(name in layer_name for name in slope_layer_names)
 
                         # Decompress tile data
                         encoded_data = layer['data']
@@ -228,26 +235,44 @@ class TileMap:
                         tile_count = len(decompressed_data) // 4
                         tiles = struct.unpack(f'<{tile_count}I', decompressed_data)
 
-                        # Convert to 2D array
-                        self.map = []
-                        for row in range(self.num_rows):
-                            row_data = []
-                            for col in range(self.num_cols):
-                                index = row * self.num_cols + col
-                                tile_id = tiles[index]
-                                row_data.append(tile_id)
-                            self.map.append(row_data)
+                        # Handle different layer types
+                        if is_slope_layer:
+                            # Store slope layer data separately 
+                            print(f"Processing slope layer '{layer.get('name')}'")
+                            for row in range(self.num_rows):
+                                for col in range(self.num_cols):
+                                    index = row * self.num_cols + col
+                                    tile_id = tiles[index]
+                                    self.slope_layer_map[row][col] = tile_id
+                            print(f"Slope layer '{layer.get('name')}' loaded successfully ({len([t for t in tiles if t > 0])} slope tiles)")
+                        elif not hasattr(self, 'map') or not self.map:
+                            # Convert to 2D array for the main collision layer
+                            self.map = []
+                            for row in range(self.num_rows):
+                                row_data = []
+                                for col in range(self.num_cols):
+                                    index = row * self.num_cols + col
+                                    tile_id = tiles[index]
+                                    row_data.append(tile_id)
+                                self.map.append(row_data)
 
-                        # If this is a collision layer, mark all its tiles as BLOCKED
-                        if is_collision_layer:
-                            print(f"Marking layer '{layer.get('name')}' as collision layer")
-                            # Update all non-zero tiles in this layer to be BLOCKED
-                            for tile_id in set(tiles):
-                                if tile_id > 0 and tile_id in self.tiled_tiles:
-                                    self.tiled_tiles[tile_id]['type'] = Tile.BLOCKED
+                            # If this is a collision layer, mark tiles as BLOCKED only if they don't have slope properties
+                            if is_collision_layer:
+                                print(f"Processing collision layer '{layer.get('name')}'")
+                                # Update non-zero tiles to be BLOCKED, but preserve slope tiles as NORMAL
+                                for tile_id in set(tiles):
+                                    if tile_id > 0 and tile_id in self.tiled_tiles:
+                                        # Only mark as BLOCKED if it's not a slope tile
+                                        if self.tiled_tiles[tile_id].get('slope_type') is None:
+                                            self.tiled_tiles[tile_id]['type'] = Tile.BLOCKED
+                                        else:
+                                            # This tile has slope properties, keep it as NORMAL for rectangular collision
+                                            self.tiled_tiles[tile_id]['type'] = Tile.NORMAL
+                                            print(f"  Tile {tile_id} has slope properties, keeping as NORMAL for collision")
+                        else:
+                            print(f"Skipping additional layer '{layer.get('name')}' (main map already loaded)")
 
-                        # Only load first visible tile layer for now
-                        break
+                        # Continue processing more layers (don't break on first layer)
 
             print(f"Loaded Tiled map: {map_path} ({self.num_cols}x{self.num_rows})")
 
@@ -325,20 +350,29 @@ class TileMap:
                         # tile_id in map is 1-based, but tile definitions use 0-based IDs
                         props = tile_properties.get(tile_id - 1, {})
                         tile_type = Tile.NORMAL
+                        slope_type = None
 
                         # Check for collision property (support various naming conventions)
                         if props.get('type') == 'BLOCKED' or props.get('collision') == 'true' or props.get('blocked') == 'true':
                             tile_type = Tile.BLOCKED
+                        
+                        # Check for slope properties
+                        if props.get('right_slope') == 'true':
+                            slope_type = Tile.RIGHT_SLOPE
+                        elif props.get('left_slope') == 'true':
+                            slope_type = Tile.LEFT_SLOPE
 
                         self.tiled_tiles[tile_id] = {
                             'image': tile_image.copy(),
-                            'type': tile_type
+                            'type': tile_type,
+                            'slope_type': slope_type
                         }
 
                         tile_id += 1
 
                 blocked_count = sum(1 for t in self.tiled_tiles.values() if t['type'] == Tile.BLOCKED)
-                print(f"Loaded Tiled tileset: {tsx_path} ({tile_count} tiles, {columns} columns, {blocked_count} blocked)")
+                slope_count = sum(1 for t in self.tiled_tiles.values() if t.get('slope_type') is not None)
+                print(f"Loaded Tiled tileset: {tsx_path} ({tile_count} tiles, {columns} columns, {blocked_count} blocked, {slope_count} sloped)")
 
         except Exception as e:
             print(f"Error loading Tiled tileset {tsx_path}: {e}")
@@ -419,9 +453,22 @@ class TileMap:
 
         # Use appropriate collision system based on map format
         if self.map_format == 'tiled':
+            # Check if this position has a slope tile in the slope layer first
+            if (hasattr(self, 'slope_layer_map') and self.slope_layer_map and
+                row < len(self.slope_layer_map) and col < len(self.slope_layer_map[row]) and
+                self.slope_layer_map[row][col] != 0):
+                # This position has a slope in separate slope layer, so don't use rectangular collision
+                return Tile.NORMAL
+            
             # Tiled format: lookup tile in dictionary
             if tile_index in self.tiled_tiles:
-                return self.tiled_tiles[tile_index]['type']
+                # Check if this tile has slope properties (mixed slope/collision layer)
+                tile_data = self.tiled_tiles[tile_index]
+                if tile_data.get('slope_type') is not None:
+                    # This tile has slope properties, so don't use rectangular collision
+                    return Tile.NORMAL
+                # Regular tile, use its collision type
+                return tile_data['type']
             return Tile.NORMAL
         else:
             # Legacy format: calculate tileset row/col
@@ -433,6 +480,229 @@ class TileMap:
                 return Tile.NORMAL
 
             return self.tiles[tile_row][tile_col].type
+
+    def get_slope_type(self, row, col):
+        """
+        Get slope type at position - checks both slope layer and main map
+        
+        Args:
+            row: Row index
+            col: Column index
+            
+        Returns:
+            Tile.LEFT_SLOPE, Tile.RIGHT_SLOPE, or None if no slope
+        """
+        if (row < 0 or row >= self.num_rows or 
+            col < 0 or col >= self.num_cols):
+            return None
+        
+        # First check the separate slope layer if it exists
+        if (hasattr(self, 'slope_layer_map') and 
+            self.slope_layer_map and 
+            row < len(self.slope_layer_map) and 
+            col < len(self.slope_layer_map[row])):
+            
+            tile_index = self.slope_layer_map[row][col]
+            if tile_index != 0 and self.map_format == 'tiled' and tile_index in self.tiled_tiles:
+                slope_type = self.tiled_tiles[tile_index].get('slope_type')
+                if slope_type is not None:
+                    return slope_type
+        
+        # If no slope in separate layer, check main map for slope properties
+        if (hasattr(self, 'map') and self.map and 
+            row < len(self.map) and col < len(self.map[row])):
+            
+            tile_index = self.map[row][col]
+            if tile_index != 0 and self.map_format == 'tiled' and tile_index in self.tiled_tiles:
+                slope_type = self.tiled_tiles[tile_index].get('slope_type')
+                if slope_type is not None:
+                    return slope_type
+            
+        return None
+
+    def check_slope_collision(self, x, y, player_width, player_height, dy=0, debug=False):
+        """
+        Check for slope collision and return the adjusted Y position
+        
+        Args:
+            x: Player center X position
+            y: Player center Y position
+            player_width: Player collision width
+            player_height: Player collision height
+            dy: Player's vertical velocity (optional, used to prevent jump interference)
+            debug: Enable debug output
+            
+        Returns:
+            tuple: (collision_occurred, adjusted_y, slope_type)
+        """
+        if debug:
+            print(f"\n=== SLOPE COLLISION DEBUG ===")
+            print(f"Player: x={x:.1f}, y={y:.1f}, dy={dy:.2f}")
+            print(f"Player size: {player_width}x{player_height}")
+        
+        # Don't detect slopes when jumping upward (prevents infinite jump bug)
+        if dy < -0.5:  # Player is moving up with significant velocity
+            if debug:
+                print(f"BLOCKED: dy={dy:.2f} < -0.5 (jumping upward)")
+            return (False, y, None)
+        tile_size = self.tile_size
+        
+        # Get the tile coordinates for the player's bottom edge
+        player_bottom = y + player_height / 2
+        player_left = x - player_width / 2
+        player_right = x + player_width / 2
+        
+        if debug:
+            print(f"Player bounds: left={player_left:.1f}, right={player_right:.1f}, bottom={player_bottom:.1f}")
+        
+        # Check tiles that the player might be standing on or falling into
+        tile_left = int(player_left / tile_size)
+        tile_right = int(player_right / tile_size)
+        
+        # Check current tile row and the one below (for when falling/landing on slopes)
+        current_tile_row = int(y / tile_size)  # Player center tile row
+        bottom_tile_row = int(player_bottom / tile_size)  # Player bottom tile row
+        
+        if debug:
+            print(f"Tile ranges: cols {tile_left}-{tile_right}, rows {current_tile_row}-{bottom_tile_row}")
+        
+        # Store the best slope match (closest to player's bottom)
+        best_slope_y = None
+        best_slope_type = None
+        
+        # Check both the current row and bottom row for slopes (avoid duplicates)
+        tile_rows_to_check = list(dict.fromkeys([current_tile_row, bottom_tile_row]))  # Remove duplicates while preserving order
+        
+        if debug:
+            print(f"Checking tiles in rows: {tile_rows_to_check}")
+        
+        for tile_row in tile_rows_to_check:
+            for tile_col in range(tile_left, tile_right + 1):
+                if debug:
+                    print(f"\n  Checking tile ({tile_row},{tile_col}):")
+                
+                # Check slope layer first
+                slope_type = self.get_slope_type(tile_row, tile_col)
+                
+                # If no slope in separate layer, check main collision layer for slope tiles
+                if slope_type is None and hasattr(self, 'map') and self.map:
+                    if (tile_row >= 0 and tile_row < len(self.map) and 
+                        tile_col >= 0 and tile_col < len(self.map[tile_row])):
+                        tile_index = self.map[tile_row][tile_col]
+                        if tile_index > 0 and tile_index in self.tiled_tiles:
+                            slope_type = self.tiled_tiles[tile_index].get('slope_type')
+                
+                if debug:
+                    print(f"    slope_type: {slope_type}")
+                
+                if slope_type is None:
+                    if debug:
+                        print(f"    -> SKIPPED: No slope")
+                    continue
+                    
+                # Calculate the slope height at the player's X position within this tile
+                tile_x_start = tile_col * tile_size
+                tile_x_end = tile_x_start + tile_size  # This is 160 for tile_col=4
+                tile_y_start = tile_row * tile_size
+                tile_y_end = tile_y_start + tile_size
+                
+                # Check if player overlaps with this tile (player could straddle boundary)
+                player_left_edge = x - player_width / 2
+                player_right_edge = x + player_width / 2
+                
+                if debug:
+                    print(f"    tile_bounds: x={tile_x_start}-{tile_x_end}, y_start={tile_y_start}")
+                    print(f"    player_edges: left={player_left_edge:.1f}, right={player_right_edge:.1f}")
+                
+                # Skip if player doesn't overlap this tile at all
+                if player_right_edge <= tile_x_start or player_left_edge >= tile_x_end:
+                    if debug:
+                        print(f"    -> SKIPPED: No overlap")
+                    continue
+                
+                # Use player center X for slope calculation, but clamp to tile bounds
+                # Ensure we don't go exactly to the edge to avoid floating point issues
+                player_x_in_tile = max(tile_x_start + 0.01, min(tile_x_end - 0.01, x))
+                
+                # Calculate relative position within tile (0.0 to 1.0)
+                relative_x = (player_x_in_tile - tile_x_start) / tile_size
+                
+                if slope_type == Tile.RIGHT_SLOPE:
+                    # Right slope: high on left (0), low on right (1)
+                    # slope height decreases from left to right
+                    # Height goes from full tile height at left to 0 at right
+                    slope_height_ratio = 1.0 - relative_x
+                elif slope_type == Tile.LEFT_SLOPE:
+                    # Left slope: low on left (0), high on right (1) 
+                    # slope height increases from left to right
+                    # Height goes from 0 at left to full tile height at right
+                    slope_height_ratio = relative_x
+                else:
+                    continue
+                    
+                # Calculate the actual Y position of the slope at this X
+                slope_y = tile_y_start + (1.0 - slope_height_ratio) * tile_size
+                
+                if debug:
+                    print(f"    player_x_in_tile: {player_x_in_tile:.1f}")
+                    print(f"    relative_x: {relative_x:.3f}")
+                    print(f"    slope_height_ratio: {slope_height_ratio:.3f}")
+                    print(f"    calculated slope_y: {slope_y:.1f}")
+                
+                # Check if player should be on the slope
+                # Player must be at or below slope surface (with generous tolerance for smooth movement)
+                tolerance = 15  # Increased tolerance to prevent ledges during horizontal movement
+                
+                # Check tolerance
+                tolerance_check = player_bottom >= (slope_y - tolerance)
+                
+                if debug:
+                    print(f"    tolerance_check: {player_bottom:.1f} >= ({slope_y:.1f} - {tolerance}) = {player_bottom:.1f} >= {slope_y - tolerance:.1f} = {tolerance_check}")
+                
+                if tolerance_check:
+                    # Store slopes separately for center vs edge tiles
+                    player_center_in_tile = (x >= tile_x_start and x < tile_x_end)
+                    
+                    if debug:
+                        print(f"    player_center_in_tile: {player_center_in_tile} (x={x:.1f} in {tile_x_start}-{tile_x_end})")
+                    
+                    if player_center_in_tile:
+                        # Player center is in this tile - this takes absolute priority
+                        if debug:
+                            print(f"    -> CENTER TILE: Setting best_slope_y={slope_y:.1f} (was {best_slope_y})")
+                        best_slope_y = slope_y
+                        best_slope_type = slope_type
+                    elif best_slope_y is None:
+                        # No slope found yet and this isn't a center tile, but use it as fallback
+                        if debug:
+                            print(f"    -> FALLBACK: Setting best_slope_y={slope_y:.1f}")
+                        best_slope_y = slope_y
+                        best_slope_type = slope_type
+                    else:
+                        if debug:
+                            print(f"    -> IGNORED: Already have slope and this is not center tile")
+                    # If we already have a slope and this isn't a center tile, ignore it
+                else:
+                    if debug:
+                        print(f"    -> FAILED TOLERANCE: Player too far from slope")
+        
+        # Apply the best slope collision found
+        if best_slope_y is not None:
+            adjusted_y = best_slope_y - player_height / 2
+            
+            if debug:
+                print(f"\nFINAL RESULT:")
+                print(f"  best_slope_y: {best_slope_y:.1f}")
+                print(f"  adjusted_y: {adjusted_y:.1f} (slope_y - player_height/2)")
+                print(f"  slope_type: {best_slope_type}")
+                print(f"  surface_y would be: {adjusted_y + player_height/2:.1f}")
+            
+            return (True, adjusted_y, best_slope_type)
+        
+        if debug:
+            print(f"\nFINAL RESULT: No slope collision detected")
+        
+        return (False, y, None)
 
     def draw(self, surface):
         """
@@ -641,13 +911,25 @@ class TileMap:
 
     def find_spawn_position(self):
         """
-        Find the spawn position on the highest leftmost collision tile.
-        Returns (x, y) in world coordinates, positioned on top of the tile.
+        Find the spawn position from the "Player Spawn" layer.
+        Returns (x, y) in world coordinates, positioned at the center of the spawn tile.
 
         Returns:
-            tuple: (x, y) spawn position, or (25, 160) as default if no collision found
+            tuple: (x, y) spawn position, or (25, 160) as default if no spawn tile found
         """
-        # Scan from left to right, top to bottom
+        # First try to get spawn position from "Player Spawn" layer
+        spawn_positions = self.get_entity_positions_from_layer("Player Spawn")
+        
+        if spawn_positions:
+            # Use the first (and should be only) spawn position
+            spawn_x, spawn_y = spawn_positions[0]
+            # Lower the player by one tile length (32px)
+            spawn_y += self.tile_size
+            print(f"Spawn position found in 'Player Spawn' layer: world position ({spawn_x}, {spawn_y})")
+            return (spawn_x, spawn_y)
+        
+        # Fallback: scan for highest leftmost collision tile (legacy behavior)
+        print("Warning: No 'Player Spawn' layer found, falling back to collision tile detection")
         for col in range(self.num_cols):
             for row in range(self.num_rows):
                 tile_type = self.get_type(row, col)
@@ -662,6 +944,6 @@ class TileMap:
                     print(f"Spawn position found at tile ({row}, {col}): world position ({spawn_x}, {spawn_y})")
                     return (spawn_x, spawn_y)
 
-        # No collision tiles found, return default
-        print("Warning: No collision tiles found for spawn, using default position")
+        # No spawn or collision tiles found, return default
+        print("Warning: No spawn or collision tiles found for spawn, using default position")
         return (25, 160)

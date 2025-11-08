@@ -269,22 +269,39 @@ class Player:
                         self.dy = 0
                         break
 
-        # Y collision with tiles
-        next_y = self.y + self.dy
-        self.check_collision(self.x, next_y)
-        if self.dy < 0:  # upward
-            if self.top_left or self.top_right:
+        # Check slope collision (only for downward movement to land on slopes)
+        # Slopes should NOT interfere with jumping or horizontal movement
+        slope_collision_handled = False
+        if not standing_platform and self.dy > 0:  # Only check slopes when falling down
+            next_y = self.y + self.dy
+            slope_hit, slope_adjusted_y, slope_type = self.tilemap.check_slope_collision(
+                self.x, next_y, self.cwidth, self.cheight, self.dy
+            )
+            
+            if slope_hit:
+                # Land on the slope surface
+                self.y = slope_adjusted_y
                 self.dy = 0
-                tile_size = self.tilemap.get_tile_size()
-                self.y = int(self.y / tile_size) * tile_size + self.cheight / 2
-        elif self.dy > 0:  # downward
-            if self.bottom_left or self.bottom_right:
-                self.dy = 0
-                tile_size = self.tilemap.get_tile_size()
-                self.y = (int(self.y / tile_size) + 1) * tile_size - self.cheight / 2
+                slope_collision_handled = True
+                # Do NOT set on_ground here - let the ground detection logic handle it
 
-        # Apply Y velocity
-        self.y += self.dy
+        # Y collision with tiles (only if slope collision didn't handle it)
+        if not slope_collision_handled:
+            next_y = self.y + self.dy
+            self.check_collision(self.x, next_y)
+            if self.dy < 0:  # upward
+                if self.top_left or self.top_right:
+                    self.dy = 0
+                    tile_size = self.tilemap.get_tile_size()
+                    self.y = int(self.y / tile_size) * tile_size + self.cheight / 2
+            elif self.dy > 0:  # downward
+                if self.bottom_left or self.bottom_right:
+                    self.dy = 0
+                    tile_size = self.tilemap.get_tile_size()
+                    self.y = (int(self.y / tile_size) + 1) * tile_size - self.cheight / 2
+
+            # Apply Y velocity
+            self.y += self.dy
 
         # Check if still on platform
         on_moving_platform = False
@@ -327,9 +344,20 @@ class Player:
                 if not horizontal_on:
                     self.last_platform = None
 
-        # Ground detection
+        # Ground detection (check regular tiles and slopes)
         self.check_collision(self.x, self.y + 1)
-        self.on_ground = (self.bottom_left or self.bottom_right) or on_moving_platform
+        regular_ground = (self.bottom_left or self.bottom_right)
+        
+        # Also check if standing on a slope (only when not actively jumping upward)
+        slope_ground = False
+        if not regular_ground and not on_moving_platform and self.dy >= -0.1:  # Small tolerance for micro-adjustments
+            # Use a very small probe distance and only when close to ground level
+            slope_hit, _, _ = self.tilemap.check_slope_collision(
+                self.x, self.y + 1, self.cwidth, self.cheight, self.dy
+            )
+            slope_ground = slope_hit
+        
+        self.on_ground = regular_ground or on_moving_platform or slope_ground
 
         # Move with horizontal platform (vertical already done at start of update)
         if standing_platform and self.on_ground and hasattr(standing_platform, 'start_x'):

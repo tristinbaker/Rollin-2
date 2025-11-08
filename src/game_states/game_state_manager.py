@@ -8,6 +8,7 @@ from game_states.rollin1.level2_state import Level2State as Rollin1Level2State
 from game_states.rollin1.level3_state import Level3State as Rollin1Level3State
 from game_states.rollin1.level4_state import Level4State as Rollin1Level4State
 from game_states.rollin2.level_1_state import Level1State as Rollin2Level1State
+from game_states.rollin2.level_2_state import Level2State as Rollin2Level2State
 from game_states.options_state import OptionsState
 from game_states.pause_state import PauseState
 
@@ -30,6 +31,7 @@ class GameStateManager:
     OPTIONS_STATE = 13
     LEVEL4_STATE = 14  # Secret level
     ROLLIN2_LEVEL1_STATE = 15  # Rollin 2 Level 1
+    ROLLIN2_LEVEL2_STATE = 16  # Rollin 2 Level 2
 
     def __init__(self, input_handler, audio_manager):
         # Input handler reference
@@ -39,7 +41,7 @@ class GameStateManager:
         self.audio_manager = audio_manager
 
         # Game state array
-        self.game_states = [None] * 16  # Increased for ROLLIN2_LEVEL1_STATE
+        self.game_states = [None] * 17  # Increased for ROLLIN2_LEVEL2_STATE
 
         # Global game variables
         self.score = 0
@@ -91,6 +93,8 @@ class GameStateManager:
             self.game_states[state] = Rollin1Level4State(self)
         elif state == self.ROLLIN2_LEVEL1_STATE:
             self.game_states[state] = Rollin2Level1State(self)
+        elif state == self.ROLLIN2_LEVEL2_STATE:
+            self.game_states[state] = Rollin2Level2State(self)
         elif state == self.OPTIONS_STATE:
             self.game_states[state] = OptionsState(self)
         elif state == self.PAUSE_STATE:

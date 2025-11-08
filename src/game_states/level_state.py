@@ -47,6 +47,14 @@ class LevelState(GameState):
         """Initialize the level (override in subclasses)"""
         pass
 
+    def get_total_available_coins(self):
+        """Get the total number of coins available in this level
+        
+        Returns:
+            int: Total number of coins that can be collected in this level
+        """
+        return len(self.coins)
+
     def load_simple_background(self, filename, scroll_speed=0.1, subfolder="rollin1"):
         """Load a single background image (for Rollin 1 levels)
 
@@ -268,8 +276,9 @@ class LevelState(GameState):
         # Coin count with icon (top right)
         current_x = 315  # Start from right edge
         if self.coin_hud_icon:
-            # Display coin count
-            coin_count_text = render_text_alpha(self.font, str(self.total_coins), self.hud_color, hud_alpha)
+            # Display coin count as "collected/total"
+            total_available_coins = self.get_total_available_coins()
+            coin_count_text = render_text_alpha(self.font, f"{self.total_coins}/{total_available_coins}", self.hud_color, hud_alpha)
             coin_count_rect = coin_count_text.get_rect(topright=(current_x, 5))
             surface.blit(coin_count_text, coin_count_rect)
             current_x = coin_count_rect.left - 3
@@ -291,7 +300,8 @@ class LevelState(GameState):
             surface.blit(scaled_icon, icon_rect)
         else:
             # Fallback to text
-            coins_text = render_text_alpha(self.font, f"Coins: {self.total_coins}/10", self.hud_color, hud_alpha)
+            total_available_coins = self.get_total_available_coins()
+            coins_text = render_text_alpha(self.font, f"Coins: {self.total_coins}/{total_available_coins}", self.hud_color, hud_alpha)
             coins_rect = coins_text.get_rect(topright=(current_x, 5))
             surface.blit(coins_text, coins_rect)
 
