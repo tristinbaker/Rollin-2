@@ -4,25 +4,11 @@
  "layers":[
         {
          "compression":"zlib",
-         "data":"eJzt1dEJgCAUQFFXyVokapGoRdo8I6OIPgUjzoEL4teDhxgCAAAAAAAAAAAAAAAAAPA3TSqm2lRXeRbK61NDbqw8C+Xt+51zS+VZKG8Kx26HR\/zDGq73e+\/8k9t8jre7+BLftAH6Qgjc",
+         "data":"eJzt1bENg0AMQFGvAkyC6LJFwiRUZJMkW8booAFKJEL0nvSbqyxZ1kUAAAAAAAAAAAAAAAAAAP+myuqsycbsee44HKzNurlX9s4+p07Ekab99qtuUW56yV1f1z3KTrvY7nl5d9fXNcT+Xtc9otz19E\/XO\/GbvqEmEmc=",
          "encoding":"base64",
          "height":35,
          "id":1,
          "name":"Static Platforms",
-         "opacity":1,
-         "type":"tilelayer",
-         "visible":true,
-         "width":120,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "compression":"zlib",
-         "data":"eJzt0cEJACAQA8HrXq3EUmxLfzagCOcM5B\/YCAAAAAAAAAAAAAAAAAAgs7JW19rrI1zRYzcmnxEa\/0Dj\/PrrAxwxARWHCCk=",
-         "encoding":"base64",
-         "height":35,
-         "id":14,
-         "name":"Static Sloped Platforms",
          "opacity":1,
          "type":"tilelayer",
          "visible":true,
