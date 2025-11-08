@@ -104,10 +104,7 @@ class Game:
 
     def run(self):
         """Main game loop - equivalent to GamePanel.run()"""
-        print("Game starting...")
-        print(f"Window size: {self.WINDOW_WIDTH}x{self.WINDOW_HEIGHT}")
-        print(f"Game resolution: {self.GAME_WIDTH}x{self.GAME_HEIGHT}")
-        print(f"Target FPS: {self.TARGET_FPS}")
+
 
         while self.running:
             # Handle events
@@ -131,7 +128,7 @@ class Game:
         # Cleanup
         self.audio_manager.cleanup()
         pygame.quit()
-        print("Game ended.")
+
 
 
 def main():

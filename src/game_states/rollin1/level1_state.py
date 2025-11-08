@@ -19,7 +19,7 @@ class Level1State(LevelState):
 
     def init(self):
         """Initialize Level 1"""
-        print("Initializing Level 1...")
+
 
         # Save starting score for this level
         self.level_start_score = self.gsm.get_score()
@@ -88,7 +88,7 @@ class Level1State(LevelState):
         self.win_sound_played = False
         self.death_screen_timer = 0
 
-        print("Level 1 initialized!")
+
 
     def update(self):
         """Update level logic"""
@@ -147,7 +147,7 @@ class Level1State(LevelState):
                     self.gsm.audio_manager.stop_music()
                     self.gsm.audio_manager.play_sound("win")
                     self.win_sound_played = True
-                    print("Level Complete!")
+
             # Return to menu after a moment (or could go to next level)
             # For now, just return to menu when player presses Enter
             if input_handler.is_pressed(input_handler.BUTTON1):  # Enter

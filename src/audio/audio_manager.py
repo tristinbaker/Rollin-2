@@ -43,7 +43,7 @@ class AudioManager:
             full_path = os.path.join(os.path.dirname(__file__), path)
             full_path = os.path.normpath(full_path)
             if os.path.exists(full_path):
-                print(f"Audio path found: {full_path}")
+
                 return full_path
 
         # Default fallback
@@ -61,7 +61,7 @@ class AudioManager:
 
         if os.path.exists(filepath):
             self.music_clips[name] = filepath
-            print(f"Loaded music: {name} from {filename}")
+
         else:
             print(f"Warning: Music file not found: {filepath}")
 
@@ -82,7 +82,7 @@ class AudioManager:
                 self.sound_relative_volumes[name] = relative_volume
                 sound.set_volume(self.sfx_volume * relative_volume)
                 self.sound_effects[name] = sound
-                print(f"Loaded sound: {name} from {filename}")
+
             except Exception as e:
                 print(f"Error loading sound {filename}: {e}")
         else:
@@ -111,7 +111,7 @@ class AudioManager:
             pygame.mixer.music.set_volume(self.music_volume)
             pygame.mixer.music.play(loops=loops, fade_ms=fade_ms)
             self.current_music = name
-            print(f"Playing music: {name}")
+
         except Exception as e:
             print(f"Error playing music {name}: {e}")
 

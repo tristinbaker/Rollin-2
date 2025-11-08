@@ -18,7 +18,7 @@ class Level4State(LevelState):
 
     def init(self):
         """Initialize Level 4 (Secret Level)"""
-        print("Initializing Level 4 (Secret Level)...")
+
 
         # Save starting score for this level
         self.level_start_score = self.gsm.get_score()
@@ -161,7 +161,7 @@ class Level4State(LevelState):
         self.death_screen_timer = 0
         self.at_goal = False  # Flag for when player reaches goal area
 
-        print("Level 4 (Secret Level) initialized!")
+
 
     def update(self):
         """Update level logic"""
@@ -223,7 +223,7 @@ class Level4State(LevelState):
                         self.gsm.audio_manager.stop_music()
                         self.gsm.audio_manager.play_sound("win")
                         self.win_sound_played = True
-                        print("Level 4 (Secret Level) Complete!")
+
                 # Return to menu after a moment
                 if input_handler.is_pressed(input_handler.BUTTON1):  # Enter
                     self.gsm.set_state(self.gsm.MENU_STATE)

@@ -20,8 +20,9 @@ class Bat(Enemy):
         # Movement boundaries
         self.min_x = min_x
         self.max_x = max_x
-        self.min_y = 0  # Top of screen
-        self.max_y = 240  # Bottom of game area
+        # Set vertical boundaries relative to spawn position (will be set in set_position)
+        self.min_y = 0
+        self.max_y = 240
 
         # Movement mode: "predictable" or "random"
         self.movement_mode = movement_mode
@@ -34,9 +35,19 @@ class Bat(Enemy):
         # Random movement variables
         self.direction_change_timer = 0
         self.direction_change_interval = random.randint(500, 1500)  # Change direction every 0.5-1.5 seconds
+        
+
 
         # Load sprites
         self._load_sprites()
+
+    def set_position(self, x, y):
+        """Set bat position and calculate vertical boundaries"""
+        super().set_position(x, y)
+        # Set vertical boundaries relative to spawn position (±50 pixels)
+        boundary_range = 50
+        self.min_y = max(0, y - boundary_range)
+        self.max_y = y + boundary_range
 
     def _load_sprites(self):
         """Load bat sprite sheet"""
@@ -100,25 +111,32 @@ class Bat(Enemy):
             self._update_predictable_movement(dt, moving_platforms)
 
     def _update_predictable_movement(self, dt, moving_platforms=None):
-        """Predictable bouncing movement (easy mode)"""
+        """Predictable W-pattern movement (easy mode)"""
         # Calculate next position
         next_x = self.x + self.dx
         next_y = self.y + self.dy
 
-        # Check horizontal boundaries
+        # Check horizontal boundaries - when hitting boundary, reverse horizontal AND vertical
+        # This creates the W pattern zigzag effect
         if next_x < self.min_x or next_x > self.max_x:
-            self.dx = -self.dx  # Reverse horizontal direction
-            next_x = self.x + self.dx
 
-        # Check vertical boundaries
+            self.dx = -self.dx  # Reverse horizontal direction
+            self.dy = -self.dy  # Also reverse vertical to create W pattern
+            next_x = self.x + self.dx
+            next_y = self.y + self.dy
+
+        # Check vertical boundaries - only reverse vertical, keep horizontal
         if next_y < self.min_y or next_y > self.max_y:
+
             self.dy = -self.dy  # Reverse vertical direction
             next_y = self.y + self.dy
 
         # Check tile collisions
         if self.check_tile_collision(next_x, self.y):
             self.dx = -self.dx  # Reverse horizontal direction
+            self.dy = -self.dy  # Also reverse vertical for W pattern
             next_x = self.x + self.dx
+            next_y = self.y + self.dy
 
         if self.check_tile_collision(self.x, next_y):
             self.dy = -self.dy  # Reverse vertical direction
@@ -129,7 +147,9 @@ class Bat(Enemy):
             for platform in moving_platforms:
                 if platform.intersects(next_x, self.y, self.cwidth, self.cheight):
                     self.dx = -self.dx
+                    self.dy = -self.dy  # Also reverse vertical for W pattern
                     next_x = self.x + self.dx
+                    next_y = self.y + self.dy
                 if platform.intersects(self.x, next_y, self.cwidth, self.cheight):
                     self.dy = -self.dy
                     next_y = self.y + self.dy

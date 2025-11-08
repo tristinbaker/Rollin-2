@@ -10,6 +10,7 @@ from entities.slime import Slime
 from entities.bat import Bat
 from entities.wasp import Wasp
 from entities.coin import Coin
+from entities.heart import Heart
 from entities.lava import Lava
 from entities.vertical_moving_platform import VerticalMovingPlatform
 from entities.horizontal_moving_platform import HorizontalMovingPlatform
@@ -24,6 +25,7 @@ class LevelState(GameState):
         self.tilemap = None
         self.player = None
         self.coins = []
+        self.hearts = []
         self.spikes = []
         self.lava = []
         self.enemies = []
@@ -42,6 +44,24 @@ class LevelState(GameState):
         self.simple_background = None  # Single background image (for Rollin 1 levels)
         self.simple_bg_scroll_speed = 0.0  # Scroll speed for simple background
         self.level_start_score = 0  # Score at the start of this level
+    def spawn_hearts_from_layer(self, layer_name="Hearts"):
+        """Spawn hearts from a Tiled layer
+
+        Args:
+            layer_name: Name of the Tiled layer containing heart positions (default: "Hearts")
+        """
+        heart_positions = self.tilemap.get_entity_positions_from_layer(layer_name)
+        for x, y in heart_positions:
+            heart = Heart(x - 8, y - 8, self.tilemap)  # Centered in 32x32 tile
+            self.hearts.append(heart)
+
+    def update_hearts(self):
+        for heart in self.hearts:
+            heart.update(self)
+
+    def draw_hearts(self, surface):
+        for heart in self.hearts:
+            heart.draw(surface)
 
     def init(self):
         """Initialize the level (override in subclasses)"""
@@ -63,7 +83,7 @@ class LevelState(GameState):
         if os.path.exists(bg_path):
             self.simple_background = pygame.image.load(bg_path).convert()
             self.simple_bg_scroll_speed = scroll_speed
-            print(f"Loaded background: {filename} at scroll speed {scroll_speed}")
+
         else:
             print(f"Warning: Background not found at {bg_path}")
             self.simple_background = None
@@ -116,9 +136,7 @@ class LevelState(GameState):
                     scale_factor = target_height / original_height
                     new_width = int(original_width * scale_factor)
                     image = pygame.transform.scale(image, (new_width, target_height))
-                    print(f"Loaded background layer: {filename} (scaled from {original_width}x{original_height} to {new_width}x{target_height}) at speed {scroll_speed}")
-                else:
-                    print(f"Loaded background layer: {filename} ({original_width}x{original_height}) at speed {scroll_speed}")
+
 
                 self.parallax_layers.append((image, scroll_speed))
             else:
@@ -388,6 +406,7 @@ class LevelState(GameState):
         bat_tile_ids = sorted(set(tile_id for _, _, tile_id in bat_data))
         predictable_tile_id = bat_tile_ids[0] if bat_tile_ids else None
 
+
         for x, y, tile_id in bat_data:
             # Determine movement mode based on tile_id
             movement_mode = "predictable" if tile_id == predictable_tile_id else "random"
@@ -398,6 +417,7 @@ class LevelState(GameState):
 
             bat = Bat(self.tilemap, min_x, max_x, movement_mode=movement_mode)
             bat.set_position(x, y)
+
             self.enemies.append(bat)
 
     def spawn_wasps_from_layer(self, layer_name="Wasp"):
@@ -571,7 +591,6 @@ class LevelState(GameState):
                     self.gsm.audio_manager.stop_music()
                     self.gsm.audio_manager.play_sound("win")
                     self.win_sound_played = True
-                    print(f"{level_name} Complete!")
             if self.gsm.input_handler.is_pressed(self.gsm.input_handler.BUTTON1):
                 self.gsm.set_state(self.gsm.MENU_STATE)
             return True
@@ -595,7 +614,6 @@ class LevelState(GameState):
                     self.gsm.audio_manager.stop_music()
                     self.gsm.audio_manager.play_sound("win")
                     self.win_sound_played = True
-                    print(f"{level_name} Complete!")
             if self.gsm.input_handler.is_pressed(self.gsm.input_handler.BUTTON1):
                 if next_level_state is not None:
                     self.gsm.set_state(next_level_state)

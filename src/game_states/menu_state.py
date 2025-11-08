@@ -56,7 +56,7 @@ class MenuState(GameState):
     def select(self):
         """Handle menu selection"""
         if self.current_choice == 0:  # Play
-            print("Starting Rollin 2 Level 1...")
+
             # Reset score and lives when starting a new game
             self.gsm.set_score(0)
             self.gsm.set_lives(5)
@@ -64,7 +64,7 @@ class MenuState(GameState):
         elif self.current_choice == 1:  # Options
             self.gsm.set_state(self.gsm.OPTIONS_STATE)
         elif self.current_choice == 2:  # Quit
-            print("Quit selected")
+
             pygame.event.post(pygame.event.Event(pygame.QUIT))
 
     def draw(self, surface):

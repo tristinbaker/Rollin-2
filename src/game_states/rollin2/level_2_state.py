@@ -15,7 +15,7 @@ class Level2State(LevelState):
 
     def init(self):
         """Initialize Rollin 2 Level 2"""
-        print("Initializing Rollin 2 Level 2...")
+
 
         # Clear entity lists (in case reinitializing)
         self.coins = []
@@ -59,6 +59,7 @@ class Level2State(LevelState):
         self.spawn_wasps_from_layer()
         self.spawn_vertical_platforms_from_layer()
         self.spawn_horizontal_platforms_from_layer()
+        self.spawn_hearts_from_layer()
 
         # Set initial camera position immediately (no tweening)
         self.tilemap.set_position_immediate(
@@ -76,6 +77,8 @@ class Level2State(LevelState):
             audio.load_sound("coin", "rollin1/hitsound.wav", relative_volume=0.2)
         if "playerhit" not in audio.sound_effects:
             audio.load_sound("playerhit", "playerhit.mp3")
+            if "health_pickup" not in audio.sound_effects:
+                audio.load_sound("health_pickup", "health_pickup.wav", relative_volume=0.2)
         if "jump" not in audio.sound_effects:
             audio.load_sound("jump", "Jump.wav", relative_volume=0.2)
         audio.play_music("rollin2_level2", loops=-1, fade_ms=1000)
@@ -92,7 +95,7 @@ class Level2State(LevelState):
         self.win_sound_played = False
         self.death_screen_timer = 0
 
-        print("Rollin 2 Level 2 initialized!")
+
 
     def update(self):
         """Update level logic"""
@@ -145,6 +148,9 @@ class Level2State(LevelState):
 
         # Update player (60 FPS = ~16.67ms per frame)
         self.player.update(16.67, self.gsm.audio_manager, self.moving_platforms)
+
+        # Update hearts
+        self.update_hearts()
 
         # Check win condition - for Level 2, go back to menu (no Level 3 yet)
         if self.check_win_condition("Rollin 2 Level 2"):
@@ -220,3 +226,6 @@ class Level2State(LevelState):
 
         # Draw death screen if active
         self.draw_death_screen(surface)
+
+        # Draw hearts
+        self.draw_hearts(surface)
