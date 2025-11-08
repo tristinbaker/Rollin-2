@@ -148,7 +148,7 @@ class Level1State(LevelState):
         self.player.update(16.67, self.gsm.audio_manager, self.moving_platforms)
 
         # Check win condition
-        if self.check_win_condition("Rollin 2 Level 1"):
+        if self.check_win_condition_with_next_level("Rollin 2 Level 1", self.gsm.ROLLIN2_LEVEL2_STATE):
             return
 
         # Check death condition

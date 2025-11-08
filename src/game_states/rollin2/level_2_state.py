@@ -1,6 +1,5 @@
 """
 Level 2 State for Rollin 2
-Second level continuing from Level 1
 """
 import pygame
 import os
@@ -147,7 +146,7 @@ class Level2State(LevelState):
         # Update player (60 FPS = ~16.67ms per frame)
         self.player.update(16.67, self.gsm.audio_manager, self.moving_platforms)
 
-        # Check win condition
+        # Check win condition - for Level 2, go back to menu (no Level 3 yet)
         if self.check_win_condition("Rollin 2 Level 2"):
             return
 

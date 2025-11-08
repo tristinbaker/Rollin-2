@@ -577,6 +577,33 @@ class LevelState(GameState):
             return True
         return False
 
+    def check_win_condition_with_next_level(self, level_name="Level", next_level_state=None):
+        """
+        Check if player has won and handle win state with progression to next level
+
+        Args:
+            level_name: Name of the level for display
+            next_level_state: The state to transition to on win (None for menu)
+
+        Returns:
+            bool: True if win state is active, False otherwise
+        """
+        if self.player.has_won():
+            if not self.has_won:
+                self.has_won = True
+                if not self.win_sound_played:
+                    self.gsm.audio_manager.stop_music()
+                    self.gsm.audio_manager.play_sound("win")
+                    self.win_sound_played = True
+                    print(f"{level_name} Complete!")
+            if self.gsm.input_handler.is_pressed(self.gsm.input_handler.BUTTON1):
+                if next_level_state is not None:
+                    self.gsm.set_state(next_level_state)
+                else:
+                    self.gsm.set_state(self.gsm.MENU_STATE)
+            return True
+        return False
+
     def check_death_condition(self):
         """Check if player died and start death screen"""
         if self.player.is_dead():
