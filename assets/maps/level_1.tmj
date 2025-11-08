@@ -4,7 +4,21 @@
  "layers":[
         {
          "compression":"zlib",
-         "data":"eJzt1m0KgkAQxvG5StlFyj51i7SL9AIFdY9eT9KpmsGkdRPa9ctm\/X\/wIIjKOuMsigAAAAAAAAAAAAAAAAAAAAAAAAAA8N0umoNm+Mwo7XJ6YSBVrTLNVrNLu5xWe6n6etXcNBNNrpmmXFRPjKWqleWoOWnOSVfUZDPr97XQlEJ\/Q1h\/Sy8zee2BlpC5rmcscxKzf9b7iJ+7NHubC\/MbYy5VT3N573N9\/tNcuzNm93Spv31nRUBK57iIeP6\/Wkp7X\/1YTW2ubS7bZsy\/Nrb+9p2tArJ2jptOb\/zb3P8p2z8facwzMA==",
+         "data":"eJzt2UkKwkAQBdB09Gp6D4eLGL2Iw9UcjmG5CIRAFolTG9+DD9kUNHwKuklRAAAAwPilSBmZNL5Tj9Sz008fHAAA\/og7Os9ald8+AV2qVvraxOJXSce5WkQ3y0c\/kXXqP7+PmYN+s1Xv3zayG9DvLGbm+s1WvX\/HyGlAv+RNv7+lfue0db17zpFL5Bq5vfFc5KP9FvYehtdp\/j92bYXfZ6dhXOw0AACQozvEfhMh",
+         "encoding":"base64",
+         "height":35,
+         "id":16,
+         "name":"Background",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":120,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "compression":"zlib",
+         "data":"eJztml1OwzAQhLcPSPxdAgoScAtSBFyDlotQkIoEl6DwBCeBU7GWa9VN4yRNNnGymZFGhqYPm4z8ab0pkU5dsxP2hH0TuRZIXg\/sKXvGfoxcCySvJ\/ac\/cx+iVwLJC+Tr+Mz8tUnk6\/jM\/LVJ\/BZt8Bn3QKfdQt8tjphn7LHq7XI48D3zf8L9mu75QcFPlv5cx6J9ZJ91eodZAt8tjL5uudQd01W\/qX4OYPPViZf9xzqrlPazDpmzuCzlSSf57TOOqG4+xl8tpLm8yTHbeZs3i+Az\/J8npWwyTmvF8\/q2Y3PdrivD\/aSvU\/Dfj8oxec9ss\/zs4SXBX+H1q8K93dByFeCz+dtF15SJl\/wuT6fu5zv0PevBJ+7ku8b+519y75j39Owf7+hic\/f7B\/a7uOHzGf\/HNFXPrs9+0frbP1+HXxuns\/mPUbW+Sbvc3c2yjszuz3rZ5tewefm+WzOo1nnm9Dnhit+TunzsrOfa6i+IfO5q\/2zPz8u61B94LMMnw9GRIfsI\/bxqF5dbv7k5htVXXUuokWa+mdoW03zWXJPQ7tL23wD2lQMPmNPt6eu9s+QjMBn3epb\/+zPtYrmXlWua1Pf+Fz0u8i617UpPQfsOp\/9uUdo3lnnet+V5tM\/CLMqaA==",
          "encoding":"base64",
          "height":35,
          "id":1,
@@ -18,7 +32,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztziEBAAAIA7AbmtI\/Ax0QYLYESwAAAAAAAAAAAAAAAAAAAICtru8BFwYJ0gBq",
+         "data":"eJztzkENAAAIBKD72NT+GYzhdJCABAAAAP7r2h4AAAAAAAAAAAAAAABw2QAGdgBq",
          "encoding":"base64",
          "height":35,
          "id":15,
@@ -32,7 +46,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJzt0iEBAAAIxMA3VKN\/JAQhQNwlmFgCAAAAAAAAAAAAAAAAALC6rgv4yBcAkAwCSQCX",
+         "data":"eJztziEBAAAIA7AbqtE\/Eh0QYLYESwAAAAAAAAAAAAAAAAAAbnR9DwAAdgbUUQBM",
          "encoding":"base64",
          "height":35,
          "id":3,
@@ -74,7 +88,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztzskNACAMBLFN\/5VxFEW6QCBbmv8kAAAAAAAAAAAAAAAAAAD8bFQyu9Xtun0DAG86cC0DLw==",
+         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
          "encoding":"base64",
          "height":35,
          "id":4,
@@ -88,7 +102,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztzskNACAMBLFN+RxFky5AwpbmPwkAAAAAAAAAAAAAAAAAAPCjUcnsVrfr9g3A2w6McQIv",
+         "data":"eJzt2TkOgEAMBMFxyPFxjkfjgIAfLFpVSS2nkzsBAAAAAAAA+L+lkrXbur1GrwEAAAAAAADg66jk7K733v66AEzoAaquAug=",
          "encoding":"base64",
          "height":35,
          "id":5,
@@ -102,7 +116,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztw6ENAAAIA7AZXuL\/05BoLGmTJgAAAAAAAAAAAAAAAAAAfNe1AYC7AUqkALI=",
+         "data":"eJzt1sENABAQBEAfLem\/NE8PER4SsZlJNGBvuVIAAICbWh0HgP950yGDLmNPzyZfAPibfzybfN9Z3b1MAABmdiTIotOQRac5tZsVswQAwC0dPfYHJg==",
          "encoding":"base64",
          "height":35,
          "id":8,
@@ -130,7 +144,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
+         "data":"eJzt2TERADAMAzEvhVP+9AIhQy+5DtL6ZuAEAAAAAAAA\/nXP7B4AAAAAAAAA2NF9+q8dAKYVS0wA+w==",
          "encoding":"base64",
          "height":35,
          "id":7,
@@ -156,7 +170,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":16,
+ "nextlayerid":17,
  "nextobjectid":1,
  "orientation":"orthogonal",
  "renderorder":"right-down",

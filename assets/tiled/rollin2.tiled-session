@@ -5,22 +5,25 @@
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_1.tmj": {
-            "scale": 1.5,
-            "selectedLayer": 0,
+            "scale": 1,
+            "selectedLayer": 10,
             "viewCenter": {
-                "x": 1136.3333333333333,
-                "y": 863.6666666666665
+                "x": 1785.5,
+                "y": 668.5
             }
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_2.tmj": {
-            "scale": 0.5890494791666666,
-            "selectedLayer": 0,
+            "scale": 1,
+            "selectedLayer": 11,
             "viewCenter": {
-                "x": 1377.643183978426,
-                "y": 786.8608943610602
+                "x": 1521.5,
+                "y": 633.5
             }
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/tilesets/coin.tsx": {
+            "dynamicWrapping": false
+        },
+        "/home/tristinb/Programming/Python/Rollin2/assets/tilesets/lava.tsx": {
             "dynamicWrapping": false
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/tilesets/spikes.tsx": {

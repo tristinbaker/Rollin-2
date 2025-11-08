@@ -48,6 +48,7 @@ class TileMap:
         # Tiled-specific data
         self.tiled_tiles = {}  # For Tiled: {tile_id: {'image': surface, 'type': NORMAL/BLOCKED, 'slope_type': NONE/LEFT/RIGHT}}
         self.slope_layer_map = []  # Separate 2D array for slope tiles from "Static Sloped Platforms" layer
+        self.background_layers = []  # List of background layer maps (rendered behind main layer, no collision)
 
         # Drawing optimization
         self.row_offset = 0
@@ -214,6 +215,7 @@ class TileMap:
             # Load tile layer data and track collision layers
             collision_layer_names = ['platforms', 'collision', 'solid', 'ground']
             slope_layer_names = ['static sloped platforms', 'sloped platforms', 'slopes']
+            background_layer_names = ['background']
             
             # Initialize slope layer map with zeros
             self.slope_layer_map = [[0 for _ in range(self.num_cols)] for _ in range(self.num_rows)]
@@ -224,6 +226,7 @@ class TileMap:
                         layer_name = layer.get('name', '').lower()
                         is_collision_layer = any(name in layer_name for name in collision_layer_names)
                         is_slope_layer = any(name in layer_name for name in slope_layer_names)
+                        is_background_layer = any(name in layer_name for name in background_layer_names)
 
                         # Decompress tile data
                         encoded_data = layer['data']
@@ -236,7 +239,19 @@ class TileMap:
                         tiles = struct.unpack(f'<{tile_count}I', decompressed_data)
 
                         # Handle different layer types
-                        if is_slope_layer:
+                        if is_background_layer:
+                            # Store background layer data (no collision)
+                            background_layer = []
+                            for row in range(self.num_rows):
+                                row_data = []
+                                for col in range(self.num_cols):
+                                    index = row * self.num_cols + col
+                                    tile_id = tiles[index]
+                                    row_data.append(tile_id)
+                                background_layer.append(row_data)
+                            self.background_layers.append(background_layer)
+                            print(f"Processed background layer '{layer.get('name')}' ({len([t for t in tiles if t > 0])} tiles)")
+                        elif is_slope_layer:
                             # Store slope layer data separately 
                             print(f"Processing slope layer '{layer.get('name')}'")
                             for row in range(self.num_rows):
@@ -707,14 +722,37 @@ class TileMap:
     def draw(self, surface):
         """
         Draw ALL tiles in the map (works with both legacy and Tiled maps)
+        Renders background layers first, then main layer
 
         Args:
             surface: pygame.Surface to draw on
         """
-        # Draw every single tile in the entire map
+        # First, draw all background layers (behind everything else)
+        for background_layer in self.background_layers:
+            self._draw_layer(surface, background_layer)
+        
+        # Then draw the main collision/foreground layer
+        self._draw_layer(surface, self.map)
+
+    def _draw_layer(self, surface, layer_map):
+        """
+        Draw a specific layer
+
+        Args:
+            surface: pygame.Surface to draw on
+            layer_map: 2D array representing the layer
+        """
+        if not layer_map:
+            return
+            
+        # Draw every tile in the layer
         for row in range(self.num_rows):
             for col in range(self.num_cols):
-                tile_index = self.map[row][col]
+                # Make sure we don't go out of bounds
+                if row >= len(layer_map) or col >= len(layer_map[row]):
+                    continue
+                    
+                tile_index = layer_map[row][col]
 
                 # Skip empty tiles
                 if tile_index == 0:
