@@ -148,7 +148,7 @@ class Level1State(LevelState):
         self.player.update(16.67, self.gsm.audio_manager, self.moving_platforms)
 
         # Check win condition
-        if self.check_win_condition_level1():
+        if self.check_win_condition("Rollin 2 Level 1"):
             return
 
         # Check death condition
@@ -221,24 +221,3 @@ class Level1State(LevelState):
 
         # Draw death screen if active
         self.draw_death_screen(surface)
-
-    def check_win_condition_level1(self):
-        """
-        Check if player has won Level 1 and handle transition to Level 2
-
-        Returns:
-            bool: True if win state is active, False otherwise
-        """
-        if self.player.has_won():
-            if not self.has_won:
-                self.has_won = True
-                if not self.win_sound_played:
-                    self.gsm.audio_manager.stop_music()
-                    self.gsm.audio_manager.play_sound("win")
-                    self.win_sound_played = True
-                    print("Rollin 2 Level 1 Complete!")
-            if self.gsm.input_handler.is_pressed(self.gsm.input_handler.BUTTON1):
-                # Transition to Level 2 instead of menu
-                self.gsm.set_state(self.gsm.ROLLIN2_LEVEL2_STATE)
-            return True
-        return False
