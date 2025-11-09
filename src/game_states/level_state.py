@@ -31,6 +31,7 @@ class LevelState(GameState):
         self.enemies = []
         self.moving_platforms = []
         self.total_coins = 0
+        self.max_coins = 0  # Total coins in the level
         self.font = None
         self.has_won = False
         self.win_sound_played = False
@@ -286,8 +287,8 @@ class LevelState(GameState):
         # Coin count with icon (top right)
         current_x = 315  # Start from right edge
         if self.coin_hud_icon:
-            # Display coin count
-            coin_count_text = render_text_alpha(self.font, str(self.total_coins), self.hud_color, hud_alpha)
+            # Display coin count as "x <collected> / <total>"
+            coin_count_text = render_text_alpha(self.font, f"{self.total_coins} / {self.max_coins}", self.hud_color, hud_alpha)
             coin_count_rect = coin_count_text.get_rect(topright=(current_x, 5))
             surface.blit(coin_count_text, coin_count_rect)
             current_x = coin_count_rect.left - 3
@@ -309,7 +310,7 @@ class LevelState(GameState):
             surface.blit(scaled_icon, icon_rect)
         else:
             # Fallback to text
-            coins_text = render_text_alpha(self.font, f"Coins: {self.total_coins}/10", self.hud_color, hud_alpha)
+            coins_text = render_text_alpha(self.font, f"Coins: {self.total_coins}/{self.max_coins}", self.hud_color, hud_alpha)
             coins_rect = coins_text.get_rect(topright=(current_x, 5))
             surface.blit(coins_text, coins_rect)
 
@@ -361,6 +362,7 @@ class LevelState(GameState):
             coin = Coin(self.tilemap, coin_color)
             coin.set_position(x, y + y_offset)
             self.coins.append(coin)
+        self.max_coins = len(self.coins)  # Set total coins after spawning
 
     def spawn_spikes_from_layer(self, layer_name="Spike Trap", y_offset=32):
         """Spawn spikes from a Tiled layer

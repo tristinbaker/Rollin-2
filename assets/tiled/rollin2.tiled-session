@@ -8,11 +8,11 @@
             "scaleInDock": 1
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_1.tmj": {
-            "scale": 2,
-            "selectedLayer": 0,
+            "scale": 1.5,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 1920,
-                "y": 559.75
+                "x": 694.6666666666667,
+                "y": 651
             }
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_2.tmj": {

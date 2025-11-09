@@ -14,7 +14,7 @@ from game_states.pause_state import PauseState
 
 
 class GameStateManager:
-    # State constants (matching Java original)
+    # Rollin 1 States
     MENU_STATE = 0
     LEVEL1_STATE = 1
     HELP_STATE = 2
@@ -30,6 +30,7 @@ class GameStateManager:
     GAMEOVER_STATE = 12
     OPTIONS_STATE = 13
     LEVEL4_STATE = 14  # Secret level
+    # Rollin 2 States
     ROLLIN2_LEVEL1_STATE = 15  # Rollin 2 Level 1
     ROLLIN2_LEVEL2_STATE = 16  # Rollin 2 Level 2
 
@@ -49,7 +50,8 @@ class GameStateManager:
         self.hard_mode = False
 
         # Current state
-        self.current_state = self.MENU_STATE
+        #self.current_state = self.MENU_STATE
+        self.current_state = self.ROLLIN2_LEVEL2_STATE  # Start directly in Level 2 for testing
 
         # Initialize states
         self._init_states()
@@ -58,6 +60,7 @@ class GameStateManager:
         """Initialize all game states"""
         # Start with menu state only
         self.game_states[self.MENU_STATE] = MenuState(self)
+        self.game_states[self.ROLLIN2_LEVEL2_STATE] = Rollin2Level2State(self)
 
         # Initialize the menu state
         if self.game_states[self.current_state]:

@@ -25,6 +25,7 @@ class Level1State(LevelState):
         self.enemies = []
         self.moving_platforms = []
         self.total_coins = 0
+        self.max_coins = 0
 
         # Save starting score for this level
         self.level_start_score = self.gsm.get_score()
