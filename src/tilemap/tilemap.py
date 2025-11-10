@@ -210,7 +210,7 @@ class TileMap:
             # Load tile layer data and track collision layers
             collision_layer_names = ['platforms', 'collision', 'solid', 'ground']
             slope_layer_names = ['static sloped platforms', 'sloped platforms', 'slopes']
-            background_layer_names = ['background']
+            background_layer_names = ['background', 'background 2']
             
             # Initialize slope layer map with zeros
             self.slope_layer_map = [[0 for _ in range(self.num_cols)] for _ in range(self.num_rows)]
@@ -665,7 +665,27 @@ class TileMap:
             surface: pygame.Surface to draw on
         """
         # First, draw all background layers (behind everything else)
-        for background_layer in self.background_layers:
+        # Ensure 'Background' is drawn first, then 'Background 2', then others
+        ordered_backgrounds = []
+        names = [layer.get('name', '').lower() for layer in getattr(self, '_raw_layers', [])]
+        # If _raw_layers is not set, fallback to current order
+        if hasattr(self, '_raw_layers'):
+            # Find indices for 'background' and 'background 2'
+            bg_indices = [i for i, n in enumerate(names) if n == 'background']
+            bg2_indices = [i for i, n in enumerate(names) if n == 'background 2']
+            # Add 'Background' first
+            for i in bg_indices:
+                ordered_backgrounds.append(self.background_layers[i])
+            # Then 'Background 2'
+            for i in bg2_indices:
+                ordered_backgrounds.append(self.background_layers[i])
+            # Then any other background layers
+            for i, n in enumerate(names):
+                if n not in ('background', 'background 2'):
+                    ordered_backgrounds.append(self.background_layers[i])
+        else:
+            ordered_backgrounds = self.background_layers
+        for background_layer in ordered_backgrounds:
             self._draw_layer(surface, background_layer)
         
         # Then draw the main collision/foreground layer
