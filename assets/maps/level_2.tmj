@@ -60,7 +60,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJzt2KENADAMA7CSvdb\/T6rGRgqKKk32BSEJSAQAAAAAAACwJc92AgAm7Db8R68BAAAAgOv9Cv2GAECnAOxCAXg=",
+         "data":"eJzt2KENACAMRNGarsb+I5E6DK4NCXlvgjNnfgQAAAAAAAAAE1a+XgB082v4j18DAAAAAOVshbohAHCzAV+iAXg=",
          "encoding":"base64",
          "height":35,
          "id":3,
@@ -102,7 +102,21 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJzt1MkJwDAMRUHhTrIVnq3P\/CIMJskMvLtASFUAAAAAAAAA9DS1qjktaU1bGz0RPe3Z55HOdKXbfuH1\/O1v87f\/yV1\/m7sGAAAAAABGeQC\/iAvX",
+         "data":"eJzt0csJgDAURNFHOvFXeEzs06lBBBeeA3c\/MFUAAAAAAAAAAPBfS6ta05b2dLSvF\/Gmnj\/PNNJMl38BAAAAAACAh270KwPz",
+         "encoding":"base64",
+         "height":35,
+         "id":18,
+         "name":"Opposite Vertical Moving Platforms",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":120,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "compression":"zlib",
+         "data":"eJzt1ckJgEAQRNFmMnELfFzytELwIAzKe\/DvDXXoKgAAAAAAAADgqalVzWlJa9ra6It4U8+eezrSmS77AnySf\/1v\/jUAAAAAADDKDabFB+U=",
          "encoding":"base64",
          "height":35,
          "id":4,
@@ -184,7 +198,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":18,
+ "nextlayerid":19,
  "nextobjectid":1,
  "orientation":"orthogonal",
  "renderorder":"right-down",

@@ -58,6 +58,7 @@ class Level2State(LevelState):
         self.spawn_bats_from_layer()
         self.spawn_wasps_from_layer()
         self.spawn_vertical_platforms_from_layer()
+        self.spawn_opposite_vertical_platforms_from_layer()
         self.spawn_horizontal_platforms_from_layer()
         self.spawn_hearts_from_layer()
 

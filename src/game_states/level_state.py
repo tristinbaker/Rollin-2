@@ -482,17 +482,106 @@ class LevelState(GameState):
             lava.set_position(x - 1, y + y_offset)
             self.lava.append(lava)
 
+    def _group_adjacent_platforms(self, platform_data):
+        """Group adjacent platform tiles using flood fill algorithm"""
+        import random
+        from collections import deque
+        
+        # Convert positions to grid coordinates for adjacency checking
+        tile_size = self.tilemap.tile_size
+        position_to_grid = {}
+        grid_to_data = {}
+        
+        for x, y, tile_id in platform_data:
+            # Convert pixel coordinates to grid coordinates
+            grid_x = round((x - tile_size // 2) / tile_size)
+            grid_y = round((y - tile_size // 2) / tile_size)
+            position_to_grid[(x, y)] = (grid_x, grid_y)
+            grid_to_data[(grid_x, grid_y)] = (x, y, tile_id)
+        
+        visited = set()
+        groups = []
+        
+        for (grid_x, grid_y), (x, y, tile_id) in grid_to_data.items():
+            if (grid_x, grid_y) in visited:
+                continue
+                
+            # Start new group using flood fill
+            group = []
+            queue = deque([(grid_x, grid_y)])
+            visited.add((grid_x, grid_y))
+            
+            while queue:
+                curr_x, curr_y = queue.popleft()
+                curr_data = grid_to_data[(curr_x, curr_y)]
+                group.append(curr_data)
+                
+                # Check 4-directional neighbors (up, down, left, right)
+                for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                    next_x, next_y = curr_x + dx, curr_y + dy
+                    if (next_x, next_y) in grid_to_data and (next_x, next_y) not in visited:
+                        queue.append((next_x, next_y))
+                        visited.add((next_x, next_y))
+            
+            groups.append(group)
+        
+        return groups
+
     def spawn_vertical_platforms_from_layer(self, layer_name="Vertical Moving Platforms"):
         """Spawn vertical moving platforms from a Tiled layer
 
         Args:
             layer_name: Name of the Tiled layer containing platform positions
         """
+        import random
+        
         platform_data = self.tilemap.get_entity_positions_with_tiles(layer_name)
-        for x, y, tile_id in platform_data:
-            platform = VerticalMovingPlatform(self.tilemap, tile_id)
-            platform.set_position(x, y)
-            self.moving_platforms.append(platform)
+        groups = self._group_adjacent_platforms(platform_data)
+        
+        # Store the direction for regular vertical platforms (we'll use the opposite for opposite platforms)
+        if not hasattr(self, '_vertical_platform_direction'):
+            self._vertical_platform_direction = random.choice([-1, 1])
+        
+        for group in groups:
+            # All groups in the regular layer use the same base direction
+            group_direction = self._vertical_platform_direction
+            
+            for x, y, tile_id in group:
+                platform = VerticalMovingPlatform(self.tilemap, tile_id)
+                platform.set_position(x, y)
+                platform.direction = group_direction
+                self.moving_platforms.append(platform)
+        
+        # Automatically attach spikes to platforms if both exist
+        self._auto_attach_spikes_to_platforms()
+
+    def spawn_opposite_vertical_platforms_from_layer(self, layer_name="Opposite Vertical Moving Platforms"):
+        """Spawn opposite vertical moving platforms from a Tiled layer
+        These platforms start in the opposite direction from regular vertical platforms
+
+        Args:
+            layer_name: Name of the Tiled layer containing platform positions
+        """
+        import random
+        
+        platform_data = self.tilemap.get_entity_positions_with_tiles(layer_name)
+        groups = self._group_adjacent_platforms(platform_data)
+        
+        # Get the base direction (opposite of regular vertical platforms)
+        if not hasattr(self, '_vertical_platform_direction'):
+            self._vertical_platform_direction = random.choice([-1, 1])
+        
+        opposite_base_direction = -self._vertical_platform_direction
+        
+        for group in groups:
+            # All groups in the opposite layer use the opposite direction
+            group_direction = opposite_base_direction
+            
+            for x, y, tile_id in group:
+                platform = VerticalMovingPlatform(self.tilemap, tile_id)
+                platform.set_position(x, y)
+                platform.direction = group_direction
+                self.moving_platforms.append(platform)
         
         # Automatically attach spikes to platforms if both exist
         self._auto_attach_spikes_to_platforms()
@@ -503,11 +592,20 @@ class LevelState(GameState):
         Args:
             layer_name: Name of the Tiled layer containing platform positions
         """
+        import random
+        
         platform_data = self.tilemap.get_entity_positions_with_tiles(layer_name)
-        for x, y, tile_id in platform_data:
-            platform = HorizontalMovingPlatform(self.tilemap, tile_id)
-            platform.set_position(x, y)
-            self.moving_platforms.append(platform)
+        groups = self._group_adjacent_platforms(platform_data)
+        
+        for group in groups:
+            # Assign random direction to this group
+            group_direction = random.choice([-1, 1])
+            
+            for x, y, tile_id in group:
+                platform = HorizontalMovingPlatform(self.tilemap, tile_id)
+                platform.set_position(x, y)
+                platform.direction = group_direction
+                self.moving_platforms.append(platform)
         
         # Automatically attach spikes to platforms if both exist
         self._auto_attach_spikes_to_platforms()
