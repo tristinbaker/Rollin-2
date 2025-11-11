@@ -9,6 +9,7 @@ from game_states.rollin1.level3_state import Level3State as Rollin1Level3State
 from game_states.rollin1.level4_state import Level4State as Rollin1Level4State
 from game_states.rollin2.level_1_state import Level1State as Rollin2Level1State
 from game_states.rollin2.level_2_state import Level2State as Rollin2Level2State
+from game_states.rollin2.level_3_state import Level3State as Rollin2Level3State
 from game_states.options_state import OptionsState
 from game_states.pause_state import PauseState
 
@@ -33,6 +34,7 @@ class GameStateManager:
     # Rollin 2 States
     ROLLIN2_LEVEL1_STATE = 15  # Rollin 2 Level 1
     ROLLIN2_LEVEL2_STATE = 16  # Rollin 2 Level 2
+    ROLLIN2_LEVEL3_STATE = 17  # Rollin 2 Level 3
 
     def __init__(self, input_handler, audio_manager):
         # Input handler reference
@@ -42,7 +44,7 @@ class GameStateManager:
         self.audio_manager = audio_manager
 
         # Game state array
-        self.game_states = [None] * 17  # Increased for ROLLIN2_LEVEL2_STATE
+        self.game_states = [None] * 18  # Increased for ROLLIN2_LEVEL2_STATE
 
         # Global game variables
         self.score = 0
@@ -51,7 +53,7 @@ class GameStateManager:
 
         # Current state
         #self.current_state = self.MENU_STATE
-        self.current_state = self.ROLLIN2_LEVEL2_STATE  # Start directly in Level 2 for testing
+        self.current_state = self.ROLLIN2_LEVEL3_STATE  # Start directly in Level 2 for testing
 
         # Initialize states
         self._init_states()
@@ -60,7 +62,7 @@ class GameStateManager:
         """Initialize all game states"""
         # Start with menu state only
         self.game_states[self.MENU_STATE] = MenuState(self)
-        self.game_states[self.ROLLIN2_LEVEL2_STATE] = Rollin2Level2State(self)
+        self.game_states[self.ROLLIN2_LEVEL3_STATE] = Rollin2Level3State(self)
 
         # Initialize the menu state
         if self.game_states[self.current_state]:
