@@ -126,13 +126,12 @@ class Level3State(LevelState):
 
     def draw(self, surface):
         self.draw_background(surface)
-        self.tilemap.draw(surface)
+        # Draw tilemap with custom layer order (lava under static platforms)
+        self.tilemap.draw_with_lava_entities(surface, self.lava)
         for platform in self.moving_platforms:
             platform.draw(surface)
         for spike in self.spikes:
             spike.draw(surface)
-        for lava_tile in self.lava:
-            lava_tile.draw(surface)
         for enemy in self.enemies:
             enemy.draw(surface)
         for coin in self.coins:

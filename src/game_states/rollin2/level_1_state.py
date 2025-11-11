@@ -186,8 +186,8 @@ class Level1State(LevelState):
         # Draw background (automatically uses simple or parallax based on what's loaded)
         self.draw_background(surface)
 
-        # Draw tilemap
-        self.tilemap.draw(surface)
+        # Draw tilemap with custom layer order (lava under static platforms)
+        self.tilemap.draw_with_lava_entities(surface, self.lava)
 
         # Draw moving platforms
         for platform in self.moving_platforms:
@@ -196,10 +196,6 @@ class Level1State(LevelState):
         # Draw spikes
         for spike in self.spikes:
             spike.draw(surface)
-
-        # Draw lava
-        for lava_tile in self.lava:
-            lava_tile.draw(surface)
 
         # Draw enemies
         for enemy in self.enemies:

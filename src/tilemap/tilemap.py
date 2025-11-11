@@ -659,7 +659,7 @@ class TileMap:
     def draw(self, surface):
         """
         Draw ALL tiles in the map (works with both legacy and Tiled maps)
-        Renders background layers first, then main layer
+        Renders background layers first, then lava layers, then main layer
 
         Args:
             surface: pygame.Surface to draw on
@@ -688,7 +688,28 @@ class TileMap:
         for background_layer in ordered_backgrounds:
             self._draw_layer(surface, background_layer)
         
-        # Then draw the main collision/foreground layer
+
+        
+        # Then draw the main collision/foreground layer (includes Static Platforms)
+        self._draw_layer(surface, self.map)
+
+    def draw_with_lava_entities(self, surface, lava_entities):
+        """
+        Draw tilemap with lava entities rendered under Static Platforms layer
+        
+        Args:
+            surface: pygame.Surface to draw on
+            lava_entities: List of lava entities to draw between background and static platforms
+        """
+        # First, draw all background layers (behind everything else)
+        for background_layer in self.background_layers:
+            self._draw_layer(surface, background_layer)
+        
+        # Then draw lava entities (underneath static platforms)
+        for lava_entity in lava_entities:
+            lava_entity.draw(surface)
+        
+        # Finally draw the main collision/foreground layer (includes Static Platforms)
         self._draw_layer(surface, self.map)
 
     def _draw_layer(self, surface, layer_map):
