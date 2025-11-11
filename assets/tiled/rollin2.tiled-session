@@ -8,27 +8,27 @@
             "scaleInDock": 1
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_1.tmj": {
-            "scale": 1.5,
+            "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 3136.6666666666665,
-                "y": 707
+                "x": 2618,
+                "y": 1103
             }
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_2.tmj": {
-            "scale": 4,
+            "scale": 0.5,
             "selectedLayer": 3,
             "viewCenter": {
-                "x": 3811,
-                "y": 655.375
+                "x": 2934,
+                "y": 563
             }
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_3.tmj": {
-            "scale": 2,
-            "selectedLayer": 0,
+            "scale": 0.75,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 3124.5,
-                "y": 813.75
+                "x": 2286.6666666666665,
+                "y": 754
             }
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/tilesets/bat.tsx": {
