@@ -8,11 +8,11 @@
             "scaleInDock": 1
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_1.tmj": {
-            "scale": 0.5,
+            "scale": 2,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 2618,
-                "y": 1103
+                "x": 1088.5,
+                "y": 795.25
             }
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_2.tmj": {
@@ -24,11 +24,11 @@
             }
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_3.tmj": {
-            "scale": 0.75,
-            "selectedLayer": 2,
+            "scale": 1.5,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 2286.6666666666665,
-                "y": 754
+                "x": 847.3333333333333,
+                "y": 589.6666666666666
             }
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/tilesets/bat.tsx": {
@@ -56,24 +56,28 @@
         "/home/tristinb/Programming/Python/Rollin2/assets/tilesets/traps.tsx": {
             "dynamicWrapping": true
         },
+        "/home/tristinb/Programming/Python/Rollin2/assets/tilesets/village.tsx": {
+            "scaleInEditor": 1
+        },
         "/home/tristinb/Programming/Python/Rollin2/assets/tilesets/wasp_colors.tsx": {
             "scaleInDock": 1
         }
     },
-    "last.imagePath": "/home/tristinb/Programming/Python/Rollin2/assets/sprites",
+    "last.imagePath": "/home/tristinb/Programming/Python/Rollin2/assets/tilesets",
     "openFiles": [
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_1.tmj",
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_2.tmj"
     ],
     "project": "rollin2.tiled-project",
     "recentFiles": [
+        "/home/tristinb/Programming/Python/Rollin2/assets/tilesets/village.tsx",
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_2.tmj",
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_1.tmj",
         "/home/tristinb/Programming/Python/Rollin2/assets/tilesets/heart.tsx"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {
-        "height": 16,
-        "width": 16
+        "height": 32,
+        "width": 32
     }
 }

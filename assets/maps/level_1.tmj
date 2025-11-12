@@ -4,11 +4,25 @@
  "layers":[
         {
          "compression":"zlib",
-         "data":"eJzt2UtOwzAQxvG4gSXLllOwBHawgmOAeKy4BYWL8LgalNcZgAmKJWPJ4LSpPU7+P+mToiap3E6nceKqAgAAAAAM1YGpqkOTexQ6NF\/DRFI726aNe4z\/2s7m73M3kow2zokM7JT6Dhb9q89rmzfJu+Rjhfeif\/XYWnE\/AKBfpkOaOfqn5CvLSKHVxST3CBAy99LVtTT+3FBjrc6kNudNfSSXS9zr3Mk59xnr6877Q9ecOsO4tLD9dyO5XaK+R3LOceL6ci8Xz\/bfg+RR8bOKvmpqe3osNNb3Z\/5u1vO\/Wnp9Q+MPrU08SZ4lC8nLGsfl++v6aOubUul178Jfr9K0ZgV93N9LKXPZnP3srh+P5T9Fq6s2JZlJk223mUZk5jRlib0aI9RLqerbZ0\/vS2F2JXt1\/PZYldi\/fRvisyT7eXLWl+s0AAzPf\/Ngf3\/MMQAApPYN3AYmZQ==",
+         "data":"eJztmklOAkEYhQsQWLkUT+FS3elK7+Ach5U73TktRC+gO6dE0AuoKweIegN15bR09gzi60glRYcmDd1SVfT7ki8hdDf88Pi7q6oRghBCCCGEEEKIm6O0EMfwJK27kmD0xYToj+muwgycryEOE\/AGud7Cu\/Tf8+o+UklXsvLYtmYV7INxFDbBfFsW9q95fJT9hF\/wO8BrsX\/NoT3gdkKIPvZTQuRgPqW7EhImcjx+iVyv4HWqcpyu6ozRf2BJV7HESKbjuisgXmRd1ssqGj8bY8amMolsppx84EwDc50cjslrzFcd93tdcxIa6jIF2X9rcL2BfAdwzGDI+RaSQhST3ts5l\/OP7L8DeGjIWkW19fmwMpU9HRVMzFddnw8b2\/P1qt\/r3sQLfIVv8P0f63JT6\/pYkjs0uR6bc68H9\/0qk+5ZEfNQfy+2jGV19rN87yidU0xltqxNZNBknWU7fJhRmtLGXvWDVy81K98we7oXwXTDnoT\/x1HFxv51GMLcZBiOwFE4FmCu0oprSfLz6Mw3SE8vIM9FuASX4Yrl\/wWMGnPIa75GZlvYtg134C7cY75WsYG8NmtkdoptZ\/AcXsBClX1b5X++UeQemT3AR\/gEn10ZOud8dR2x2nWV8zdCCCG6+QX6ZEsp",
          "encoding":"base64",
          "height":35,
          "id":16,
          "name":"Background",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":120,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "compression":"zlib",
+         "data":"eJztm0dOw0AYRg0ozplot6CXW9DLLahJWHEFamJWtAvQE1a0S7DgSbAwVgICOcrMP9+TniKNvLDnSdZM5IkiIYQQQvjEUDGKhnEER3Gs2Ok7EnkyQ89ZnMN5XFBfU6zRcx03cBO31NdLKvHnbyn+Pr5Hz308wEM8Ul+n6cJu7MmMJ19dq5m+V\/S8xhu8xTv1FUIIIYRD9LI26cN+HMDBgNcqp6zjzvAcL\/Ay\/vn67LreRcbpOYGTOIXTgfTdbdLmibFnfMFXfPulX3Zd7yKL9FzCZVzB1UD6hsI2PUtYxgruqK8pjulZxRomeKK+prin5wPWsYGP6uscSYH3aqHTdyHaRUNtW1L2YI2bptme6119W1LLqW963tu57\/Vhz+US9ZzmKz3vaiBEWPjwX+ZfsfhM\/8XiO93iMwkhhBA+oLMGtrFy1iD9DW\/2O96Q0VkD2+isgW101iBMPgBY7UmZ",
+         "encoding":"base64",
+         "height":35,
+         "id":17,
+         "name":"Background 2",
          "opacity":1,
          "type":"tilelayer",
          "visible":true,
@@ -158,7 +172,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJzt2bENACAMA7AunMP\/7\/UCBEOlVsKeM2TLkAgAAAAAAACYa6\/uBgD84rQ5tggAAAAAAKDGy+9yy\/huAOiUXgIBLQ==",
+         "data":"eJzt2aERADAIBEFMykn\/7VFBJohMEOxqBO7ERwAAAAAAVXt1fwAA8+gvAL+cmqNFAAAAAAAAb1R2l9uN7QaATglqJAFf",
          "encoding":"base64",
          "height":35,
          "id":7,
@@ -170,7 +184,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":17,
+ "nextlayerid":18,
  "nextobjectid":1,
  "orientation":"orthogonal",
  "renderorder":"right-down",
@@ -208,6 +222,10 @@
         {
          "firstgid":1404,
          "source":"..\/tilesets\/heart.tsx"
+        }, 
+        {
+         "firstgid":1407,
+         "source":"..\/tilesets\/village.tsx"
         }],
  "tilewidth":32,
  "type":"map",
