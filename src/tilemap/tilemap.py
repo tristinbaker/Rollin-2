@@ -196,16 +196,28 @@ class TileMap:
             self.ymin = 240 - self.height
             self.ymax = 0
 
-            # Load tileset
-            if 'tilesets' in data and len(data['tilesets']) > 0:
-                tileset_data = data['tilesets'][0]
-                if 'source' in tileset_data:
-                    # External tileset
-                    tsx_path = tileset_data['source']
-                    self.load_tiled_tileset(tsx_path)
-                else:
-                    # Embedded tileset
-                    print("Warning: Embedded tilesets not yet supported")
+            # Load all tilesets and handle firstgid offsets
+            self.tiled_tiles = {}
+            self.tiled_tilesets_info = []  # List of (firstgid, tilecount, source)
+            if 'tilesets' in data:
+                for tileset_data in data['tilesets']:
+                    if 'source' in tileset_data:
+                        tsx_path = tileset_data['source']
+                        firstgid = tileset_data.get('firstgid', 1)
+                        # Parse .tsx to get tilecount
+                        import xml.etree.ElementTree as ET
+                        maps_dir = os.path.join(self.assets_path, "maps")
+                        tsx_full_path = os.path.join(maps_dir, tsx_path)
+                        try:
+                            tree = ET.parse(tsx_full_path)
+                            root = tree.getroot()
+                            tilecount = int(root.get('tilecount'))
+                        except Exception:
+                            tilecount = 0
+                        self.tiled_tilesets_info.append((firstgid, tilecount, tsx_path))
+                        self._load_tiled_tileset_with_gid(tsx_path, firstgid)
+                    else:
+                        print("Warning: Embedded tilesets not yet supported")
 
             # Load tile layer data and track collision layers
             collision_layer_names = ['platforms', 'collision', 'solid', 'ground']
@@ -269,11 +281,9 @@ class TileMap:
                                 # Update non-zero tiles to be BLOCKED, but preserve slope tiles as NORMAL
                                 for tile_id in set(tiles):
                                     if tile_id > 0 and tile_id in self.tiled_tiles:
-                                        # Only mark as BLOCKED if it's not a slope tile
                                         if self.tiled_tiles[tile_id].get('slope_type') is None:
                                             self.tiled_tiles[tile_id]['type'] = Tile.BLOCKED
                                         else:
-                                            # This tile has slope properties, keep it as NORMAL for rectangular collision
                                             self.tiled_tiles[tile_id]['type'] = Tile.NORMAL
                         else:
                             pass
@@ -285,12 +295,13 @@ class TileMap:
             import traceback
             traceback.print_exc()
 
-    def load_tiled_tileset(self, tsx_path):
+    def _load_tiled_tileset_with_gid(self, tsx_path, firstgid):
         """
         Load Tiled tileset (.tsx) file
 
         Args:
             tsx_path: Path to .tsx file (relative to maps directory)
+            firstgid: The first global tile ID for this tileset
         """
         import xml.etree.ElementTree as ET
 
@@ -312,7 +323,7 @@ class TileMap:
                 image_path = os.path.join(tsx_dir, image_source)
 
                 # Load tileset image
-                self.tileset = pygame.image.load(image_path).convert_alpha()
+                tileset_image = pygame.image.load(image_path).convert_alpha()
 
                 # Get tileset dimensions from XML
                 tile_width = int(root.get('tilewidth'))
@@ -321,7 +332,7 @@ class TileMap:
                 columns = int(root.get('columns'))
 
                 # Create tile dictionary
-                self.tiled_tiles = {}
+                # self.tiled_tiles = {} # Already initialized in load_tiled_map
 
                 # First, parse tile properties from the tileset
                 tile_properties = {}  # {tile_id: properties_dict}
@@ -337,45 +348,33 @@ class TileMap:
                     tile_properties[tid] = properties
 
                 # Now create tile images with collision info
-                tile_id = 1  # Tiled uses 1-based indexing (0 = empty) in map data
-
+                # tile_id in map is firstgid-based, so we need to offset
+                tile_id = firstgid
                 rows = (tile_count + columns - 1) // columns
                 for row in range(rows):
                     for col in range(columns):
-                        if tile_id > tile_count:
+                        if tile_id >= firstgid + tile_count:
                             break
-
                         # Extract tile image
-                        tile_image = self.tileset.subsurface(
+                        tile_image = tileset_image.subsurface(
                             (col * tile_width, row * tile_height, tile_width, tile_height)
                         )
-
                         # Check if this tile has collision properties
-                        # tile_id in map is 1-based, but tile definitions use 0-based IDs
-                        props = tile_properties.get(tile_id - 1, {})
+                        props = tile_properties.get(tile_id - firstgid, {})
                         tile_type = Tile.NORMAL
                         slope_type = None
-
-                        # Check for collision property (support various naming conventions)
                         if props.get('type') == 'BLOCKED' or props.get('collision') == 'true' or props.get('blocked') == 'true':
                             tile_type = Tile.BLOCKED
-                        
-                        # Check for slope properties
                         if props.get('right_slope') == 'true':
                             slope_type = Tile.RIGHT_SLOPE
                         elif props.get('left_slope') == 'true':
                             slope_type = Tile.LEFT_SLOPE
-
                         self.tiled_tiles[tile_id] = {
                             'image': tile_image.copy(),
                             'type': tile_type,
                             'slope_type': slope_type
                         }
-
                         tile_id += 1
-
-                blocked_count = sum(1 for t in self.tiled_tiles.values() if t['type'] == Tile.BLOCKED)
-                slope_count = sum(1 for t in self.tiled_tiles.values() if t.get('slope_type') is not None)
         except Exception as e:
             print(f"Error loading Tiled tileset {tsx_path}: {e}")
             import traceback
