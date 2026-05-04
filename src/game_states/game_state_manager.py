@@ -2,6 +2,8 @@
 GameStateManager - equivalent to GameStateManager.java
 Manages game states and transitions between them
 """
+import json
+import os
 from game_states.menu_state import MenuState
 from game_states.rollin1.level1_state import Level1State as Rollin1Level1State
 from game_states.rollin1.level2_state import Level2State as Rollin1Level2State
@@ -32,9 +34,11 @@ class GameStateManager:
     OPTIONS_STATE = 13
     LEVEL4_STATE = 14  # Secret level
     # Rollin 2 States
-    ROLLIN2_LEVEL1_STATE = 15  # Rollin 2 Level 1
-    ROLLIN2_LEVEL2_STATE = 16  # Rollin 2 Level 2
-    ROLLIN2_LEVEL3_STATE = 17  # Rollin 2 Level 3
+    ROLLIN2_LEVEL1_STATE = 15
+    ROLLIN2_LEVEL2_STATE = 16
+    ROLLIN2_LEVEL3_STATE = 17
+    ROLLIN2_LEVEL4_STATE = 18
+    ROLLIN2_LEVEL5_STATE = 19
 
     def __init__(self, input_handler, audio_manager):
         # Input handler reference
@@ -44,18 +48,30 @@ class GameStateManager:
         self.audio_manager = audio_manager
 
         # Game state array
-        self.game_states = [None] * 18  # Increased for ROLLIN2_LEVEL2_STATE
+        self.game_states = [None] * 20
 
         # Global game variables
         self.score = 0
         self.lives = 5
         self.hard_mode = False
 
-        # Current state
-        #self.current_state = self.MENU_STATE
-        self.current_state = self.ROLLIN2_LEVEL3_STATE  # Start directly in Level 2 for testing
+        # Run-wide coin tracking (committed on each level completion, reset on new game)
+        self.run_coins_collected = 0
+        self.run_coins_total = 0
 
-        # Initialize states
+        # Persistent state
+        self.rollin1_unlocked = False
+        self.save_slot = None      # Mid-level save data, or None if no save exists
+        self.pending_load = None   # Set before set_state() to apply saved data after init
+        self._save_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../save.json'))
+
+        # Current state
+        self.current_state = self.MENU_STATE
+        #self.current_state = self.ROLLIN2_LEVEL1_STATE
+
+        # Load persistent progress before initializing states so the menu
+        # reflects save/unlock state on first render
+        self._load_progress()
         self._init_states()
 
     def _init_states(self):
@@ -64,7 +80,11 @@ class GameStateManager:
         self.game_states[self.MENU_STATE] = MenuState(self)
         self.game_states[self.ROLLIN2_LEVEL3_STATE] = Rollin2Level3State(self)
 
-        # Initialize the menu state
+        # Create current state if not already initialized (lazy init)
+        if self.game_states[self.current_state] is None:
+            self._create_state(self.current_state)
+
+        # Initialize the current state
         if self.game_states[self.current_state]:
             self.game_states[self.current_state].init()
 
@@ -85,6 +105,9 @@ class GameStateManager:
             # Call init on the new state (unless init=False for resuming)
             if init and self.game_states[state]:
                 self.game_states[state].init()
+                if self.pending_load is not None and hasattr(self.game_states[state], 'load_state'):
+                    self.game_states[state].load_state(self.pending_load)
+                    self.pending_load = None
 
     def _create_state(self, state):
         """Lazy initialization of game states"""
@@ -147,3 +170,47 @@ class GameStateManager:
     def set_hard_mode(self, enabled):
         """Enable/disable hard mode"""
         self.hard_mode = enabled
+
+    def commit_level_coins(self, collected, total):
+        """Add a completed level's coin counts to the run totals"""
+        self.run_coins_collected += collected
+        self.run_coins_total += total
+
+    def unlock_rollin1(self):
+        """Unlock Rollin 1 and persist to disk"""
+        self.rollin1_unlocked = True
+        self._save_progress()
+
+    def save_game(self, level_state_id, score, lives, run_coins_collected,
+                  run_coins_total, player_x, player_y, collected_coin_indices):
+        """Save mid-level progress to disk"""
+        self.save_slot = {
+            "level_state": level_state_id,
+            "score": score,
+            "lives": lives,
+            "run_coins_collected": run_coins_collected,
+            "run_coins_total": run_coins_total,
+            "player_x": player_x,
+            "player_y": player_y,
+            "collected_coins": collected_coin_indices,
+        }
+        self._save_progress()
+
+    def clear_save(self):
+        """Remove the save slot from disk"""
+        self.save_slot = None
+        self._save_progress()
+
+    def _save_progress(self):
+        data = {"rollin1_unlocked": self.rollin1_unlocked}
+        if self.save_slot is not None:
+            data["save_slot"] = self.save_slot
+        with open(self._save_path, 'w') as f:
+            json.dump(data, f)
+
+    def _load_progress(self):
+        if os.path.exists(self._save_path):
+            with open(self._save_path) as f:
+                data = json.load(f)
+            self.rollin1_unlocked = data.get("rollin1_unlocked", False)
+            self.save_slot = data.get("save_slot", None)

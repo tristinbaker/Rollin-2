@@ -35,6 +35,7 @@ class LevelState(GameState):
         self.font = None
         self.has_won = False
         self.win_sound_played = False
+        self.unlocked_this_run = False
         self.death_screen_timer = 0
         self.death_screen_duration = 2000  # 2 seconds
         self.hud_color = hud_color
@@ -710,6 +711,7 @@ class LevelState(GameState):
         if self.player.has_won():
             if not self.has_won:
                 self.has_won = True
+                self.gsm.commit_level_coins(self.total_coins, self.max_coins)
                 if not self.win_sound_played:
                     self.gsm.audio_manager.stop_music()
                     self.gsm.audio_manager.play_sound("win")
@@ -719,6 +721,31 @@ class LevelState(GameState):
                     self.gsm.set_state(next_level_state)
                 else:
                     self.gsm.set_state(self.gsm.MENU_STATE)
+            return True
+        return False
+
+    def check_final_win_condition(self, level_name="Level"):
+        """
+        Check win condition for the final level (Level 5).
+        Commits coins, checks for all-coins unlock, then returns to menu.
+        """
+        if self.player.has_won():
+            if not self.has_won:
+                self.has_won = True
+                self.unlocked_this_run = False
+                self.gsm.commit_level_coins(self.total_coins, self.max_coins)
+                self.gsm.audio_manager.stop_music()
+                if self.gsm.run_coins_collected == self.gsm.run_coins_total:
+                    self.gsm.unlock_rollin1()
+                    self.unlocked_this_run = True
+                    self.gsm.audio_manager.play_sound("finalwin")
+                else:
+                    self.gsm.audio_manager.play_sound("win")
+                self.win_sound_played = True
+            if self.gsm.input_handler.is_pressed(self.gsm.input_handler.BUTTON1):
+                self.gsm.run_coins_collected = 0
+                self.gsm.run_coins_total = 0
+                self.gsm.set_state(self.gsm.MENU_STATE)
             return True
         return False
 
@@ -747,6 +774,14 @@ class LevelState(GameState):
             death_text = death_font.render("YOU DIED!", True, (255, 0, 0))
             death_rect = death_text.get_rect(center=(160, 120))
             surface.blit(death_text, death_rect)
+
+    def load_state(self, data):
+        """Restore mid-level position and coin state from a save slot"""
+        self.player.set_position(data['player_x'], data['player_y'])
+        for idx in data.get('collected_coins', []):
+            if idx < len(self.coins):
+                self.coins[idx].is_on_screen = False
+                self.total_coins += 1
 
     def update(self):
         """Update level logic (override in subclasses)"""

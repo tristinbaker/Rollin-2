@@ -10,7 +10,7 @@ class MenuState(GameState):
     def __init__(self, gsm):
         super().__init__(gsm)
         self.current_choice = 0
-        self.options = ["Play", "Options", "Quit"]
+        self.options = []
         self.font = None
         self.title_font = None
         self.music_loaded = False
@@ -23,6 +23,14 @@ class MenuState(GameState):
         self.font = pygame.font.Font(font_path, 24)
         self.title_font = pygame.font.Font(font_path, 48)
         self.current_choice = 0
+
+        # Build option list dynamically based on save/unlock state
+        self.options = ["Play"]
+        if self.gsm.save_slot is not None:
+            self.options.append("Load Game")
+        if self.gsm.rollin1_unlocked:
+            self.options.append("Rollin 1")
+        self.options += ["Options", "Quit"]
 
         # Load and play menu music if not already loaded
         if not self.music_loaded:
@@ -55,16 +63,29 @@ class MenuState(GameState):
 
     def select(self):
         """Handle menu selection"""
-        if self.current_choice == 0:  # Play
-
-            # Reset score and lives when starting a new game
+        option = self.options[self.current_choice]
+        if option == "Play":
             self.gsm.set_score(0)
             self.gsm.set_lives(5)
+            self.gsm.run_coins_collected = 0
+            self.gsm.run_coins_total = 0
             self.gsm.set_state(self.gsm.ROLLIN2_LEVEL1_STATE)
-        elif self.current_choice == 1:  # Options
+        elif option == "Load Game":
+            slot = self.gsm.save_slot
+            self.gsm.set_score(slot['score'])
+            self.gsm.set_lives(slot['lives'])
+            self.gsm.run_coins_collected = slot['run_coins_collected']
+            self.gsm.run_coins_total = slot['run_coins_total']
+            self.gsm.pending_load = slot
+            self.gsm.clear_save()
+            self.gsm.set_state(slot['level_state'])
+        elif option == "Rollin 1":
+            self.gsm.set_score(0)
+            self.gsm.set_lives(5)
+            self.gsm.set_state(self.gsm.LEVEL1_STATE)
+        elif option == "Options":
             self.gsm.set_state(self.gsm.OPTIONS_STATE)
-        elif self.current_choice == 2:  # Quit
-
+        elif option == "Quit":
             pygame.event.post(pygame.event.Event(pygame.QUIT))
 
     def draw(self, surface):
