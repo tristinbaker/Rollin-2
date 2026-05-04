@@ -12,5 +12,4 @@ if [ ! -d "venv" ]; then
 fi
 
 # Run the game
-cd src
-../venv/bin/python game.py
+venv/bin/python src/game.py
