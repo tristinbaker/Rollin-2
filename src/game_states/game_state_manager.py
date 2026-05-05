@@ -12,6 +12,7 @@ from game_states.rollin1.level4_state import Level4State as Rollin1Level4State
 from game_states.rollin2.level_1_state import Level1State as Rollin2Level1State
 from game_states.rollin2.level_2_state import Level2State as Rollin2Level2State
 from game_states.rollin2.level_3_state import Level3State as Rollin2Level3State
+from game_states.rollin2.level_4_state import Level4State as Rollin2Level4State
 from game_states.options_state import OptionsState
 from game_states.pause_state import PauseState
 
@@ -66,8 +67,8 @@ class GameStateManager:
         self._save_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../save.json'))
 
         # Current state
-        self.current_state = self.MENU_STATE
-        #self.current_state = self.ROLLIN2_LEVEL1_STATE
+        #self.current_state = self.MENU_STATE
+        self.current_state = self.ROLLIN2_LEVEL4_STATE
 
         # Load persistent progress before initializing states so the menu
         # reflects save/unlock state on first render
@@ -123,6 +124,8 @@ class GameStateManager:
             self.game_states[state] = Rollin2Level1State(self)
         elif state == self.ROLLIN2_LEVEL2_STATE:
             self.game_states[state] = Rollin2Level2State(self)
+        elif state == self.ROLLIN2_LEVEL4_STATE:
+            self.game_states[state] = Rollin2Level4State(self)
         elif state == self.OPTIONS_STATE:
             self.game_states[state] = OptionsState(self)
         elif state == self.PAUSE_STATE:

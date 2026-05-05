@@ -23,7 +23,7 @@ class AudioManager:
 
         # Current music state
         self.current_music = None
-        self.music_volume = 0.0  # 0% volume by default (for testing)
+        self.music_volume = 0.5  # 0% volume by default (for testing)
         self.sfx_volume = 0.7    # 70% volume by default
 
         # Base path for audio files

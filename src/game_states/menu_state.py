@@ -82,6 +82,8 @@ class MenuState(GameState):
         elif option == "Rollin 1":
             self.gsm.set_score(0)
             self.gsm.set_lives(5)
+            self.gsm.run_coins_collected = 0
+            self.gsm.run_coins_total = 0
             self.gsm.set_state(self.gsm.LEVEL1_STATE)
         elif option == "Options":
             self.gsm.set_state(self.gsm.OPTIONS_STATE)

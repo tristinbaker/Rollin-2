@@ -153,8 +153,7 @@ class Level2State(LevelState):
         # Update hearts
         self.update_hearts()
 
-        # Check win condition - for Level 2, go back to menu (no Level 3 yet)
-        if self.check_win_condition("Rollin 2 Level 2"):
+        if self.check_win_condition_with_next_level("Rollin 2 Level 2", self.gsm.ROLLIN2_LEVEL3_STATE):
             return
 
         # Check death condition

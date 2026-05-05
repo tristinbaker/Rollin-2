@@ -37,7 +37,8 @@ class Level4State(LevelState):
         # Create player
         self.player = Player(self.tilemap)
         self.player.set_position(16, 400)
-        self.player.reset_hp()  # Reset HP to 3 at start of level
+        self.player.reset_hp()
+        self.player.glide_gravity_multiplier = 0.2
 
         # Create coins (121 total blue coins in pyramid formation)
         # This is a direct port of the Java coin placement logic

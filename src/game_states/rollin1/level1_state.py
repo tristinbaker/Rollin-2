@@ -38,7 +38,8 @@ class Level1State(LevelState):
         # Create player
         self.player = Player(self.tilemap)
         self.player.set_position(25, 160)
-        self.player.reset_hp()  # Reset HP to 3 at start of level
+        self.player.reset_hp()
+        self.player.glide_gravity_multiplier = 0.2
 
         # Create coins (10 total, matching Java positions)
         self.coins = []
@@ -51,6 +52,7 @@ class Level1State(LevelState):
             coin = Coin(self.tilemap, "blue")
             coin.set_position(pos[0], pos[1])
             self.coins.append(coin)
+        self.max_coins = len(self.coins)
 
         # No spikes or enemies in original Rollin 1 Level 1
         self.spikes = []
@@ -142,16 +144,14 @@ class Level1State(LevelState):
         if self.player.has_won():
             if not self.has_won:
                 self.has_won = True
-                # Play win sound and stop music
+                self.gsm.commit_level_coins(self.total_coins, self.max_coins)
                 if not self.win_sound_played:
                     self.gsm.audio_manager.stop_music()
                     self.gsm.audio_manager.play_sound("win")
                     self.win_sound_played = True
 
-            # Return to menu after a moment (or could go to next level)
-            # For now, just return to menu when player presses Enter
             if input_handler.is_pressed(input_handler.BUTTON1):  # Enter
-                self.gsm.set_state(self.gsm.MENU_STATE)
+                self.gsm.set_state(self.gsm.LEVEL2_STATE)
             return
 
         # Check if player died (HP reached 0 or fell off map) - AFTER update

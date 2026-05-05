@@ -37,7 +37,8 @@ class Level2State(LevelState):
         # Create player
         self.player = Player(self.tilemap)
         self.player.set_position(25, 220)
-        self.player.reset_hp()  # Reset HP to 3 at start of level
+        self.player.reset_hp()
+        self.player.glide_gravity_multiplier = 0.2
 
         # Create coins (12 total, matching Java positions)
         self.coins = []
@@ -50,6 +51,7 @@ class Level2State(LevelState):
             coin = Coin(self.tilemap, "yellow")
             coin.set_position(pos[0], pos[1])
             self.coins.append(coin)
+        self.max_coins = len(self.coins)
 
         # No spikes or enemies for now
         self.spikes = []
@@ -141,15 +143,14 @@ class Level2State(LevelState):
         if self.player.has_won():
             if not self.has_won:
                 self.has_won = True
-                # Play win sound and stop music
+                self.gsm.commit_level_coins(self.total_coins, self.max_coins)
                 if not self.win_sound_played:
                     self.gsm.audio_manager.stop_music()
                     self.gsm.audio_manager.play_sound("win")
                     self.win_sound_played = True
 
-            # Return to menu after a moment (or could go to next level)
             if input_handler.is_pressed(input_handler.BUTTON1):  # Enter
-                self.gsm.set_state(self.gsm.MENU_STATE)
+                self.gsm.set_state(self.gsm.LEVEL3_STATE)
             return
 
         # Check if player died (HP reached 0 or fell off map) - AFTER update

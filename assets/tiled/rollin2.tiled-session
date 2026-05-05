@@ -1,5 +1,5 @@
 {
-    "activeFile": "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_3.tmj",
+    "activeFile": "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_4.tmj",
     "expandedProjectPaths": [
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
@@ -9,10 +9,10 @@
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_1.tmj": {
             "scale": 1.5,
-            "selectedLayer": 0,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 2964.333333333333,
-                "y": 659.6666666666666
+                "x": 1509.6666666666665,
+                "y": 717
             }
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_2.tmj": {
@@ -25,10 +25,18 @@
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_3.tmj": {
             "scale": 1,
-            "selectedLayer": 1,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 1423.5,
-                "y": 773.5
+                "x": 916.5,
+                "y": 552.5
+            }
+        },
+        "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_4.tmj": {
+            "scale": 4,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 778.375,
+                "y": 860.125
             }
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/tilesets/bat.tsx": {
@@ -68,13 +76,15 @@
     "openFiles": [
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_1.tmj",
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_2.tmj",
-        "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_3.tmj"
+        "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_3.tmj",
+        "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_4.tmj"
     ],
     "project": "rollin2.tiled-project",
     "recentFiles": [
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_1.tmj",
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_2.tmj",
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_3.tmj",
+        "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_4.tmj",
         "/home/tristinb/Programming/Python/Rollin2/assets/tilesets/village.tsx",
         "/home/tristinb/Programming/Python/Rollin2/assets/tilesets/heart.tsx"
     ],

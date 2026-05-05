@@ -111,7 +111,7 @@ class Level3State(LevelState):
                     self.gsm.audio_manager.play_sound("playerhit")
         self.player.update(16.67, self.gsm.audio_manager, self.moving_platforms)
         self.update_hearts()
-        if self.check_win_condition_with_next_level("Rollin 2 Level 3", None):
+        if self.check_win_condition_with_next_level("Rollin 2 Level 3", self.gsm.ROLLIN2_LEVEL4_STATE):
             return
         if self.check_death_condition():
             return

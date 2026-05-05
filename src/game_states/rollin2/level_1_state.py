@@ -74,7 +74,7 @@ class Level1State(LevelState):
         # Load and play level music (Rollin 2 music)
         audio = self.gsm.audio_manager
         if "rollin2_level1" not in audio.music_clips:
-            audio.load_music("rollin2_level1", "Level_2.wav")  # Using Rollin 2 music
+            audio.load_music("rollin2_level1", "Level_1.wav")  # Using Rollin 2 music
         if "win" not in audio.sound_effects:
             audio.load_sound("win", "rollin1/win.wav")
         if "coin" not in audio.sound_effects:

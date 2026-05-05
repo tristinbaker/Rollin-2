@@ -48,6 +48,7 @@ class Player:
         self.down = False
         self.jumping = False
         self.gliding = False
+        self.glide_gravity_multiplier = 0.3  # Can be overridden per level
         self.facing_right = True
         self.on_ground = False
         self.underwater = False  # Set by level state
@@ -230,7 +231,7 @@ class Player:
             if self.gliding and self.dy > 0:
                 # Gliding - slow fall
                 if self.dy < 1.5:  # Slower max fall speed when gliding
-                    self.dy += self.fall_speed * 0.3
+                    self.dy += self.fall_speed * self.glide_gravity_multiplier
             else:
                 # Normal gravity
                 if self.dy < self.max_fall_speed:
