@@ -13,8 +13,10 @@ from game_states.rollin2.level_1_state import Level1State as Rollin2Level1State
 from game_states.rollin2.level_2_state import Level2State as Rollin2Level2State
 from game_states.rollin2.level_3_state import Level3State as Rollin2Level3State
 from game_states.rollin2.level_4_state import Level4State as Rollin2Level4State
+from game_states.rollin2.level_5_state import Level5State as Rollin2Level5State
 from game_states.options_state import OptionsState
 from game_states.pause_state import PauseState
+from game_states.mode_select_state import ModeSelectState
 
 
 class GameStateManager:
@@ -40,6 +42,7 @@ class GameStateManager:
     ROLLIN2_LEVEL3_STATE = 17
     ROLLIN2_LEVEL4_STATE = 18
     ROLLIN2_LEVEL5_STATE = 19
+    MODE_SELECT_STATE    = 20
 
     def __init__(self, input_handler, audio_manager):
         # Input handler reference
@@ -49,7 +52,7 @@ class GameStateManager:
         self.audio_manager = audio_manager
 
         # Game state array
-        self.game_states = [None] * 20
+        self.game_states = [None] * 21
 
         # Global game variables
         self.score = 0
@@ -60,14 +63,18 @@ class GameStateManager:
         self.run_coins_collected = 0
         self.run_coins_total = 0
 
-        # Persistent state
-        self.rollin1_unlocked = False
+        # Persistent unlocks
+        self.rollin1_unlocked    = False
+        self.demon_mode_unlocked = False
+        self.hardcore_unlocked   = False
+
+        # Current play mode (chosen per session, not persisted)
+        self.current_mode = "normal"  # "normal" | "demon" | "hardcore"
         self.save_slot = None      # Mid-level save data, or None if no save exists
         self.pending_load = None   # Set before set_state() to apply saved data after init
         self._save_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../save.json'))
 
         # Current state
-        #self.current_state = self.MENU_STATE
         self.current_state = self.ROLLIN2_LEVEL4_STATE
 
         # Load persistent progress before initializing states so the menu
@@ -126,6 +133,10 @@ class GameStateManager:
             self.game_states[state] = Rollin2Level2State(self)
         elif state == self.ROLLIN2_LEVEL4_STATE:
             self.game_states[state] = Rollin2Level4State(self)
+        elif state == self.ROLLIN2_LEVEL5_STATE:
+            self.game_states[state] = Rollin2Level5State(self)
+        elif state == self.MODE_SELECT_STATE:
+            self.game_states[state] = ModeSelectState(self)
         elif state == self.OPTIONS_STATE:
             self.game_states[state] = OptionsState(self)
         elif state == self.PAUSE_STATE:
@@ -180,8 +191,15 @@ class GameStateManager:
         self.run_coins_total += total
 
     def unlock_rollin1(self):
-        """Unlock Rollin 1 and persist to disk"""
         self.rollin1_unlocked = True
+        self._save_progress()
+
+    def unlock_demon_mode(self):
+        self.demon_mode_unlocked = True
+        self._save_progress()
+
+    def unlock_hardcore(self):
+        self.hardcore_unlocked = True
         self._save_progress()
 
     def save_game(self, level_state_id, score, lives, run_coins_collected,
@@ -205,7 +223,11 @@ class GameStateManager:
         self._save_progress()
 
     def _save_progress(self):
-        data = {"rollin1_unlocked": self.rollin1_unlocked}
+        data = {
+            "rollin1_unlocked":    self.rollin1_unlocked,
+            "demon_mode_unlocked": self.demon_mode_unlocked,
+            "hardcore_unlocked":   self.hardcore_unlocked,
+        }
         if self.save_slot is not None:
             data["save_slot"] = self.save_slot
         with open(self._save_path, 'w') as f:
@@ -215,5 +237,7 @@ class GameStateManager:
         if os.path.exists(self._save_path):
             with open(self._save_path) as f:
                 data = json.load(f)
-            self.rollin1_unlocked = data.get("rollin1_unlocked", False)
-            self.save_slot = data.get("save_slot", None)
+            self.rollin1_unlocked    = data.get("rollin1_unlocked", False)
+            self.demon_mode_unlocked = data.get("demon_mode_unlocked", False)
+            self.hardcore_unlocked   = data.get("hardcore_unlocked", False)
+            self.save_slot           = data.get("save_slot", None)

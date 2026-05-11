@@ -62,6 +62,7 @@ class Player:
         self.dead = False
         self.win = False
         self.hp = 3
+        self.hardcore = False        # One-shot kill when True
         self.invincible_timer = 0  # Invincibility frames after taking damage
         self.invincible_duration = 1000  # 1 second of invincibility
         self.lava_death_timer = 0  # Timer for delayed lava death
@@ -486,6 +487,8 @@ class Player:
     def take_damage(self, spike_x=None):
         """Take damage from a spike"""
         if self.invincible_timer <= 0:
+            if self.hardcore:
+                self.hp = 1
             self.hp -= 1
             self.invincible_timer = self.invincible_duration
 

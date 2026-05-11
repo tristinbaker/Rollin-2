@@ -50,7 +50,8 @@ class Level1State(LevelState):
         # Find spawn position on the leftmost collision tile
         spawn_x, spawn_y = self.tilemap.find_spawn_position()
         self.player.set_position(spawn_x, spawn_y)
-        self.player.reset_hp()  # Reset HP to 3 at start of level
+        self.player.reset_hp()
+        self.apply_mode_to_player()
 
         # Spawn entities from Tiled layers using inherited methods
         self.spawn_coins_from_layer()
@@ -64,6 +65,8 @@ class Level1State(LevelState):
         self.spawn_horizontal_platforms_from_layer()
         # Spawn hearts from "Hearts" layer
         self.spawn_hearts_from_layer()
+        if self.gsm.current_mode in ("demon", "hardcore"):
+            self.spawn_demon_from_layer()
 
         # Set initial camera position immediately (no tweening)
         self.tilemap.set_position_immediate(
@@ -152,6 +155,7 @@ class Level1State(LevelState):
 
         # Update player (60 FPS = ~16.67ms per frame)
         self.player.update(16.67, self.gsm.audio_manager, self.moving_platforms)
+        self.update_demon(16.67)
 
         # Update hearts
         self.update_hearts()
@@ -206,6 +210,7 @@ class Level1State(LevelState):
             coin.draw(surface)
 
         # Draw player
+        self.draw_demon(surface)
         self.player.draw(surface)
 
         # Draw HUD

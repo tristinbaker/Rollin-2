@@ -4,7 +4,12 @@ Contains common level functionality like underwater physics flag
 """
 import pygame
 import os
+import hmac
+import hashlib
+import base64
 from game_states.game_state import GameState
+
+_HARDCORE_SECRET = b"rollin2_hardcore_tdb"
 from entities.spike import Spike
 from entities.slime import Slime
 from entities.bat import Bat
@@ -42,10 +47,56 @@ class LevelState(GameState):
         self.health_sprites = None
         self.coin_hud_icon = None
         self.life_icon = None
-        self.parallax_layers = []  # List of (image, scroll_speed) tuples
-        self.simple_background = None  # Single background image (for Rollin 1 levels)
-        self.simple_bg_scroll_speed = 0.0  # Scroll speed for simple background
+        self.bg_layers = []   # Ordered list of static/animated bg layer dicts
+        self.simple_background = None
+        self.simple_bg_scroll_speed = 0.0
         self.level_start_score = 0  # Score at the start of this level
+        self.demon = None              # Chasing demon in demon/hardcore mode
+        self.demon_projectiles = []    # Projectiles fired by the demon
+        self.completion_code = None    # Set on hardcore 100% run
+
+    # ------------------------------------------------------------------
+    # Demon (persistent chaser across Rollin 2 levels)
+    # ------------------------------------------------------------------
+
+    def apply_mode_to_player(self):
+        """Call after player is created and reset_hp() is called."""
+        self.player.hardcore = (self.gsm.current_mode == "hardcore")
+        if self.player.hardcore:
+            self.player.hp = 1
+
+    def spawn_demon_from_layer(self, layer_name="Demon"):
+        from entities.demon_enemy import DemonEnemy
+        self.demon_projectiles = []
+        positions = self.tilemap.get_entity_positions_from_layer(layer_name)
+        if positions:
+            x, y = positions[0]
+            self.demon = DemonEnemy(self.tilemap)
+            self.demon.set_position(x, y)
+
+    def update_demon(self, dt):
+        if self.demon is None:
+            return
+        self.demon.update(dt, projectiles=self.demon_projectiles)
+        if self.player.hit_spike(self.demon):
+            if self.player.take_damage(self.demon.get_x()):
+                self.gsm.audio_manager.play_sound("playerhit")
+
+        for proj in self.demon_projectiles:
+            proj.update(dt)
+            if proj.active and self.player.hit_spike(proj):
+                if self.player.take_damage(proj.get_x()):
+                    self.gsm.audio_manager.play_sound("playerhit")
+                proj.active = False
+        self.demon_projectiles = [p for p in self.demon_projectiles if p.active]
+
+    def draw_demon(self, surface):
+        if self.demon is None:
+            return
+        self.demon.draw(surface)
+        for proj in self.demon_projectiles:
+            proj.draw(surface)
+
     def spawn_hearts_from_layer(self, layer_name="Hearts"):
         """Spawn hearts from a Tiled layer
 
@@ -90,142 +141,108 @@ class LevelState(GameState):
             print(f"Warning: Background not found at {bg_path}")
             self.simple_background = None
 
-    def load_parallax_layers(self, layer_configs, subfolder=None):
-        """Load parallax background layers
+    def _bg_path(self, filename, subfolder):
+        base = f"../../assets/backgrounds"
+        rel = f"{subfolder}/{filename}" if subfolder else filename
+        return os.path.normpath(os.path.join(os.path.dirname(__file__), base, rel))
 
-        Args:
-            layer_configs: List of tuples (filename, scroll_speed)
-                          filename: name of image file in backgrounds/ folder
-                          scroll_speed: float, 0.0 = static, 1.0 = moves with camera
-                          Lower values = further back, higher values = closer
-            subfolder: Optional subfolder within backgrounds/ (e.g., "level_1")
+    def _scale_to_height(self, image, target_height=240):
+        h = image.get_height()
+        if h != target_height:
+            scale = target_height / h
+            image = pygame.transform.scale(image, (int(image.get_width() * scale), target_height))
+        return image
 
-        Example:
-            self.load_parallax_layers([
-                ("forest_sky.png", 0.0),      # Static background
-                ("forest_moon.png", 0.1),     # Very slow
-                ("forest_mountain.png", 0.3), # Slow
-                ("forest_back.png", 0.5),     # Medium
-                ("forest_mid.png", 0.7),      # Fast
-                ("forest_long.png", 0.85),    # Very fast
-                ("forest_short.png", 0.95),   # Nearly 1:1 with camera
-            ], subfolder="level_1")
-        """
-        self.parallax_layers = []
-
+    def load_parallax_layers(self, layer_configs, subfolder=None, clear=True):
+        """Append static image layers to bg_layers. Pass clear=False to add without resetting."""
+        if clear:
+            self.bg_layers = []
         for filename, scroll_speed in layer_configs:
-            if subfolder:
-                bg_path = os.path.normpath(os.path.join(
-                    os.path.dirname(__file__),
-                    f"../../assets/backgrounds/{subfolder}/{filename}"
-                ))
+            path = self._bg_path(filename, subfolder)
+            if os.path.exists(path):
+                image = self._scale_to_height(pygame.image.load(path).convert_alpha())
+                self.bg_layers.append({"type": "static", "image": image, "scroll_speed": scroll_speed})
             else:
-                bg_path = os.path.normpath(os.path.join(
-                    os.path.dirname(__file__),
-                    f"../../assets/backgrounds/{filename}"
-                ))
+                print(f"Warning: Background layer not found: {path}")
 
-            if os.path.exists(bg_path):
-                image = pygame.image.load(bg_path).convert_alpha()
+    def load_animated_bg_layer(self, folder, scroll_speed=0.0, frame_delay=100, subfolder=None):
+        """Append an animated (looping frame sequence) layer to bg_layers."""
+        import re
+        folder_path = self._bg_path(folder, subfolder)
+        if not os.path.isdir(folder_path):
+            print(f"Warning: Animated BG folder not found: {folder_path}")
+            return
 
-                # Scale image to screen height (240px) while maintaining aspect ratio
-                # This allows backgrounds designed for higher resolutions to work
-                original_width = image.get_width()
-                original_height = image.get_height()
-                target_height = 240  # Screen height
+        def natural_key(name):
+            return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', name)]
 
-                if original_height != target_height:
-                    scale_factor = target_height / original_height
-                    new_width = int(original_width * scale_factor)
-                    image = pygame.transform.scale(image, (new_width, target_height))
+        files = sorted(
+            [f for f in os.listdir(folder_path) if f.lower().endswith('.png')],
+            key=natural_key
+        )
+        frames = [self._scale_to_height(pygame.image.load(os.path.join(folder_path, f)).convert_alpha())
+                  for f in files]
 
+        if frames:
+            self.bg_layers.append({
+                "type": "animated",
+                "frames": frames,
+                "scroll_speed": scroll_speed,
+                "frame_delay": frame_delay,
+                "timer": 0.0,
+                "frame_idx": 0,
+            })
 
-                self.parallax_layers.append((image, scroll_speed))
-            else:
-                print(f"Warning: Background layer not found at {bg_path}")
+    def update_animated_backgrounds(self, dt):
+        for layer in self.bg_layers:
+            if layer["type"] == "animated":
+                layer["timer"] += dt
+                if layer["timer"] >= layer["frame_delay"]:
+                    layer["timer"] -= layer["frame_delay"]
+                    layer["frame_idx"] = (layer["frame_idx"] + 1) % len(layer["frames"])
 
     def draw_background(self, surface):
-        """Draw background - automatically chooses simple or parallax based on what's loaded"""
         if self.simple_background:
             self.draw_simple_background(surface)
-        elif self.parallax_layers:
+        elif self.bg_layers:
             self.draw_parallax(surface)
 
     def draw_simple_background(self, surface):
-        """Draw simple background with parallax scrolling (for Rollin 1 levels)"""
         if not self.simple_background or not self.tilemap:
             return
-
-        # Get camera position
         camera_x = -self.tilemap.x
         camera_y = -self.tilemap.y
-
-        # Calculate parallax offset
         offset_x = camera_x * self.simple_bg_scroll_speed
         offset_y = camera_y * self.simple_bg_scroll_speed
-
-        # Get image dimensions
-        img_width = self.simple_background.get_width()
+        img_width  = self.simple_background.get_width()
         img_height = self.simple_background.get_height()
-
-        # Tile the background to fill the screen
-        screen_width = 320
-        screen_height = 240
-
         start_x = -(offset_x % img_width)
-        num_tiles_x = int((screen_width + abs(start_x) + img_width - 1) // img_width + 1)
-
         start_y = -(offset_y % img_height)
-        num_tiles_y = int((screen_height + abs(start_y) + img_height - 1) // img_height + 1)
-
-        # Draw tiled background
+        num_tiles_x = int((320 + abs(start_x) + img_width  - 1) // img_width  + 1)
+        num_tiles_y = int((240 + abs(start_y) + img_height - 1) // img_height + 1)
         for ty in range(num_tiles_y):
             for tx in range(num_tiles_x):
-                x = start_x + tx * img_width
-                y = start_y + ty * img_height
-                surface.blit(self.simple_background, (x, y))
+                surface.blit(self.simple_background, (start_x + tx * img_width, start_y + ty * img_height))
 
     def draw_parallax(self, surface):
-        """Draw parallax background layers - call this before drawing tilemap"""
         if not self.tilemap:
             return
-
-        # Get camera position (tilemap x/y are negative when camera moves right/down)
         camera_x = -self.tilemap.x
-        # Don't use camera_y for parallax - backgrounds should not scroll vertically
 
-        screen_width = 320
-        screen_height = 240
+        for layer in self.bg_layers:
+            scroll_speed = layer["scroll_speed"]
+            image = layer["frames"][layer["frame_idx"]] if layer["type"] == "animated" else layer["image"]
 
-        for i, (image, scroll_speed) in enumerate(self.parallax_layers):
-            # Calculate parallax offset (horizontal only)
-            offset_x = camera_x * scroll_speed
-
-            # Get image dimensions
-            img_width = image.get_width()
+            offset_x  = camera_x * scroll_speed
+            img_width  = image.get_width()
             img_height = image.get_height()
+            start_x   = -(offset_x % img_width)
+            num_tiles_x = int((320 + abs(start_x) + img_width - 1) // img_width + 1)
+            num_tiles_y = 1 if img_height == 240 else int((240 + img_height - 1) // img_height)
 
-            # Calculate how many times to tile horizontally to cover screen plus movement
-            # We need to account for the offset and ensure full coverage
-            start_x = -(offset_x % img_width)
-            num_tiles_x = int((screen_width + abs(start_x) + img_width - 1) // img_width + 1)
-
-            # Vertical positioning: center the image if it's 240px tall, otherwise tile
-            if img_height == screen_height:
-                # Image is exactly screen height, draw it at y=0
-                start_y = 0
-                num_tiles_y = 1
-            else:
-                # Tile vertically if needed
-                start_y = 0
-                num_tiles_y = int((screen_height + img_height - 1) // img_height)
-
-            # Draw tiled background
             for ty in range(num_tiles_y):
                 for tx in range(num_tiles_x):
-                    x = start_x + tx * img_width
-                    y = start_y + ty * img_height
-                    surface.blit(image, (x, y))
+                    surface.blit(image, (start_x + tx * img_width, ty * img_height))
 
     def load_hud_assets(self):
         """Load HUD sprites and icons - call this from subclass init()"""
@@ -272,14 +289,20 @@ class LevelState(GameState):
 
         # HP - Display health sprite instead of text
         if self.health_sprites:
-            player_hp = self.player.get_hp()
-            # Map HP to sprite index: 3 HP -> index 0, 2 HP -> index 1, 1 HP -> index 2, 0 HP -> index 3
-            sprite_index = 3 - player_hp if player_hp >= 0 else 3
-            sprite_index = max(0, min(3, sprite_index))
-            health_sprite = self.health_sprites[sprite_index]
-            # Scale down the sprite (120x36 is too big, scale to 60x18)
-            scaled_sprite = pygame.transform.scale(health_sprite, (60, 18))
-            surface.blit(scaled_sprite, (5, 5))
+            if self.gsm.current_mode == "hardcore":
+                # Hardcore: always 1/1 HP — show a single heart (full)
+                health_sprite = self.health_sprites[0]
+                scaled_sprite = pygame.transform.scale(health_sprite, (60, 18))
+                # Blit only the leftmost third (one heart)
+                surface.blit(scaled_sprite, (5, 5), (0, 0, 20, 18))
+            else:
+                player_hp = self.player.get_hp()
+                # Map HP to sprite index: 3 HP -> index 0, 2 HP -> index 1, 1 HP -> index 2, 0 HP -> index 3
+                sprite_index = 3 - player_hp if player_hp >= 0 else 3
+                sprite_index = max(0, min(3, sprite_index))
+                health_sprite = self.health_sprites[sprite_index]
+                scaled_sprite = pygame.transform.scale(health_sprite, (60, 18))
+                surface.blit(scaled_sprite, (5, 5))
         else:
             # Fallback to text if sprite not loaded
             hp_text = render_text_alpha(self.font, f"HP: {self.player.get_hp()}/3", self.hud_color, hud_alpha)
@@ -726,8 +749,8 @@ class LevelState(GameState):
 
     def check_final_win_condition(self, level_name="Level"):
         """
-        Check win condition for the final level (Level 5).
-        Commits coins, checks for all-coins unlock, then returns to menu.
+        Check win condition for the final Rollin 2 level.
+        Commits coins and fires the appropriate mode unlock on a perfect run.
         """
         if self.player.has_won():
             if not self.has_won:
@@ -735,8 +758,18 @@ class LevelState(GameState):
                 self.unlocked_this_run = False
                 self.gsm.commit_level_coins(self.total_coins, self.max_coins)
                 self.gsm.audio_manager.stop_music()
-                if self.gsm.run_coins_collected == self.gsm.run_coins_total:
-                    self.gsm.unlock_rollin1()
+                is_perfect = (self.gsm.run_coins_total > 0 and
+                              self.gsm.run_coins_collected == self.gsm.run_coins_total)
+                if is_perfect:
+                    mode = self.gsm.current_mode
+                    if mode == "normal":
+                        self.gsm.unlock_rollin1()
+                    elif mode == "demon":
+                        self.gsm.unlock_hardcore()
+                    elif mode == "hardcore":
+                        raw = hmac.new(_HARDCORE_SECRET, b"HARDCORE_COMPLETE",
+                                       hashlib.sha256).digest()[:12]
+                        self.completion_code = base64.urlsafe_b64encode(raw).decode().rstrip("=")
                     self.unlocked_this_run = True
                     self.gsm.audio_manager.play_sound("finalwin")
                 else:

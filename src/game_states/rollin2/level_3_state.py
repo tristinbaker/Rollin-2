@@ -40,6 +40,7 @@ class Level3State(LevelState):
         spawn_x, spawn_y = self.tilemap.find_spawn_position()
         self.player.set_position(spawn_x, spawn_y)
         self.player.reset_hp()
+        self.apply_mode_to_player()
 
         # Spawn entities from Tiled layers
         self.spawn_coins_from_layer()
@@ -52,6 +53,8 @@ class Level3State(LevelState):
         self.spawn_opposite_vertical_platforms_from_layer()
         self.spawn_horizontal_platforms_from_layer()
         self.spawn_hearts_from_layer()
+        if self.gsm.current_mode in ("demon", "hardcore"):
+            self.spawn_demon_from_layer()
 
         # Set initial camera position
         self.tilemap.set_position_immediate(
@@ -110,6 +113,7 @@ class Level3State(LevelState):
                 if self.player.take_damage(enemy.get_x()):
                     self.gsm.audio_manager.play_sound("playerhit")
         self.player.update(16.67, self.gsm.audio_manager, self.moving_platforms)
+        self.update_demon(16.67)
         self.update_hearts()
         if self.check_win_condition_with_next_level("Rollin 2 Level 3", self.gsm.ROLLIN2_LEVEL4_STATE):
             return
@@ -136,6 +140,7 @@ class Level3State(LevelState):
             enemy.draw(surface)
         for coin in self.coins:
             coin.draw(surface)
+        self.draw_demon(surface)
         self.player.draw(surface)
         self.draw_hud(surface)
         if self.has_won:

@@ -197,12 +197,26 @@
          "width":120,
          "x":0,
          "y":0
+        }, 
+        {
+         "compression":"zlib",
+         "data":"eJztzkENAAAIBKD72D+FPY3hnJCABAAAAAAAAAAAAADgjq7tAQAAAADw0QDx9gCr",
+         "encoding":"base64",
+         "height":35,
+         "id":19,
+         "name":"Demon",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":120,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":19,
+ "nextlayerid":20,
  "nextobjectid":1,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.11.2",
+ "tiledversion":"1.12.1",
  "tileheight":32,
  "tilesets":[
         {
@@ -236,6 +250,10 @@
         {
          "firstgid":1404,
          "source":"..\/tilesets\/heart.tsx"
+        }, 
+        {
+         "firstgid":1407,
+         "source":"..\/tilesets\/village.tsx"
         }],
  "tilewidth":32,
  "type":"map",

@@ -24,11 +24,8 @@ class Level4State(LevelState):
         self.level_start_score = self.gsm.get_score()
         self.underwater = False
 
-        self.load_parallax_layers([
-            ("back.png",   0.0),
-            ("middle.png", 0.5),
-            ("front.png",  0.95),
-        ], subfolder="other/full_levels/autumn")
+        self.bg_layers = []
+        self.load_animated_bg_layer("Back (4)", scroll_speed=0.0, frame_delay=80, subfolder="level_4")
 
         self.tilemap = TileMap(32)
         self.tilemap.load_map("maps/level_4.tmj")
@@ -37,6 +34,7 @@ class Level4State(LevelState):
         spawn_x, spawn_y = self.tilemap.find_spawn_position()
         self.player.set_position(spawn_x, spawn_y)
         self.player.reset_hp()
+        self.apply_mode_to_player()
 
         self.spawn_coins_from_layer()
         self.spawn_spikes_from_layer()
@@ -48,6 +46,8 @@ class Level4State(LevelState):
         self.spawn_opposite_vertical_platforms_from_layer()
         self.spawn_horizontal_platforms_from_layer()
         self.spawn_hearts_from_layer()
+        if self.gsm.current_mode in ("demon", "hardcore"):
+            self.spawn_demon_from_layer()
 
         self.tilemap.set_position_immediate(
             160 - self.player.get_x(),
@@ -103,6 +103,8 @@ class Level4State(LevelState):
                 if self.player.take_damage(enemy.get_x()):
                     self.gsm.audio_manager.play_sound("playerhit")
         self.player.update(16.67, self.gsm.audio_manager, self.moving_platforms)
+        self.update_demon(16.67)
+        self.update_animated_backgrounds(16.67)
         self.update_hearts()
         if self.check_win_condition_with_next_level("Rollin 2 Level 4", self.gsm.ROLLIN2_LEVEL5_STATE):
             return
@@ -125,6 +127,7 @@ class Level4State(LevelState):
             enemy.draw(surface)
         for coin in self.coins:
             coin.draw(surface)
+        self.draw_demon(surface)
         self.player.draw(surface)
         self.draw_hud(surface)
         if self.has_won:

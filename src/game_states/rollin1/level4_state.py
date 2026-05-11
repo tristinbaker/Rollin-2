@@ -125,6 +125,8 @@ class Level4State(LevelState):
             self.coins.append(coin)
             j += 30
 
+        self.max_coins = len(self.coins)  # 121
+
         # No spikes or enemies
         self.spikes = []
         self.enemies = []
@@ -219,10 +221,16 @@ class Level4State(LevelState):
             if self.total_coins >= 120:  # Need at least 120 coins
                 if not self.has_won:
                     self.has_won = True
-                    # Play win sound and stop music
+                    self.gsm.commit_level_coins(self.total_coins, self.max_coins)
+                    self.gsm.audio_manager.stop_music()
                     if not self.win_sound_played:
-                        self.gsm.audio_manager.stop_music()
-                        self.gsm.audio_manager.play_sound("win")
+                        is_perfect = (self.gsm.run_coins_total > 0 and
+                                      self.gsm.run_coins_collected == self.gsm.run_coins_total)
+                        if is_perfect:
+                            self.gsm.unlock_demon_mode()
+                            self.gsm.audio_manager.play_sound("finalwin")
+                        else:
+                            self.gsm.audio_manager.play_sound("win")
                         self.win_sound_played = True
 
                 # Return to menu after a moment

@@ -65,11 +65,7 @@ class MenuState(GameState):
         """Handle menu selection"""
         option = self.options[self.current_choice]
         if option == "Play":
-            self.gsm.set_score(0)
-            self.gsm.set_lives(5)
-            self.gsm.run_coins_collected = 0
-            self.gsm.run_coins_total = 0
-            self.gsm.set_state(self.gsm.ROLLIN2_LEVEL1_STATE)
+            self.gsm.set_state(self.gsm.MODE_SELECT_STATE)
         elif option == "Load Game":
             slot = self.gsm.save_slot
             self.gsm.set_score(slot['score'])

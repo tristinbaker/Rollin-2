@@ -183,8 +183,22 @@
          "width":120,
          "x":0,
          "y":0
+        }, 
+        {
+         "compression":"zlib",
+         "data":"eJztzkENAAAIBKD72D+FPY3hdJCABLisa3sAAAAAAAAAAAAAAAAAAADw3wBYGgCr",
+         "encoding":"base64",
+         "height":35,
+         "id":18,
+         "name":"Demon",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":120,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":18,
+ "nextlayerid":19,
  "nextobjectid":1,
  "orientation":"orthogonal",
  "renderorder":"right-down",

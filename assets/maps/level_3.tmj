@@ -186,6 +186,20 @@
         }, 
         {
          "compression":"zlib",
+         "data":"eJztzjENAAAIA7A9+FeBT0QQwtMqaAIAwLWu7wEAAAAAAAAAAAAAAAAAsDGQ\/gCr",
+         "encoding":"base64",
+         "height":35,
+         "id":19,
+         "name":"Demon",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":120,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "compression":"zlib",
          "data":"eJzt2LENACAIBEAaB7Fy\/w1NqJwANdz135F8nggAAKCbOWoyAPASXcZN7g8AAPiNHQMAAAAAwGn5GwMApA3RFwDr",
          "encoding":"base64",
          "height":35,
@@ -198,7 +212,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":19,
+ "nextlayerid":20,
  "nextobjectid":1,
  "orientation":"orthogonal",
  "renderorder":"right-down",
