@@ -98,6 +98,7 @@ class LevelState(GameState):
         Args:
             layer_name: Name of the Tiled layer containing heart positions (default: "Hearts")
         """
+        self.hearts = []
         heart_positions = self.tilemap.get_entity_positions_from_layer(layer_name)
         for x, y in heart_positions:
             heart = Heart(x - 8, y - 8, self.tilemap)  # Centered in 32x32 tile
@@ -730,10 +731,9 @@ class LevelState(GameState):
                 self.gsm.lose_life()
                 self.gsm.set_score(self.level_start_score)
                 if self.gsm.get_lives() <= 0:
-                    if self.gsm.current_mode == "hardcore":
-                        self.gsm.level_checkpoint = None
-                        self.gsm.save_slot = None
-                        self.gsm._save_progress()
+                    self.gsm.level_checkpoint = None
+                    self.gsm.save_slot = None
+                    self.gsm._save_progress()
                     self.gsm.set_lives(5)
                     self.gsm.set_state(self.gsm.MENU_STATE)
                 else:

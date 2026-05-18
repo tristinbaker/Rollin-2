@@ -105,7 +105,7 @@ class GameStateManager:
                 with open(os.path.join(assets, map_file)) as f:
                     data = json.load(f)
                 for layer in data.get("layers", []):
-                    if layer.get("name", "").lower() == "coins":
+                    if layer.get("name", "").lower() == "coin":
                         raw = zlib.decompress(base64.b64decode(layer["data"]))
                         tiles = struct.unpack(f'<{len(raw)//4}I', raw)
                         total += sum(1 for t in tiles if t != 0)
