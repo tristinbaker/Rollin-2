@@ -1,5 +1,6 @@
 import pygame
 import os
+from paths import asset
 
 
 class PingPongAnimation:
@@ -83,9 +84,7 @@ class Lava:
 
     def _load_sprites(self):
         """Load lava sprite sheet"""
-        sprite_path = os.path.normpath(
-            os.path.join(os.path.dirname(__file__), "../../assets/sprites/lava.png")
-        )
+        sprite_path = asset("sprites/lava.png")
 
         if not os.path.exists(sprite_path):
             print("Error: Could not find lava.png")

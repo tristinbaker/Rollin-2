@@ -4,6 +4,7 @@ Handles music and sound effect playback using pygame.mixer
 """
 import pygame
 import os
+from paths import asset
 
 
 class AudioManager:
@@ -30,24 +31,7 @@ class AudioManager:
         self.audio_path = self._find_audio_path()
 
     def _find_audio_path(self):
-        """Find the audio assets directory"""
-        # Try multiple possible locations
-        possible_paths = [
-            "../../assets/audio/",        # Python project assets (priority)
-            "../assets/audio/",           # If assets copied to Python project
-            "../../res/Audio/",           # Relative to src directory
-            "../../../res/Audio/",        # From deeper directory
-        ]
-
-        for path in possible_paths:
-            full_path = os.path.join(os.path.dirname(__file__), path)
-            full_path = os.path.normpath(full_path)
-            if os.path.exists(full_path):
-
-                return full_path
-
-        # Default fallback
-        return os.path.normpath(os.path.join(os.path.dirname(__file__), "../../assets/audio/"))
+        return asset("audio")
 
     def load_music(self, name, filename):
         """

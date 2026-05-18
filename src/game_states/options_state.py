@@ -4,6 +4,7 @@ Allows control of sound effects and music volume
 """
 import pygame
 from game_states.game_state import GameState
+from paths import asset
 
 
 class OptionsState(GameState):
@@ -22,8 +23,7 @@ class OptionsState(GameState):
     def init(self):
         """Initialize options state"""
         # Initialize fonts
-        import os
-        font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../assets/fonts/upheavtt.ttf"))
+        font_path = asset("fonts/upheavtt.ttf")
         self.font = pygame.font.Font(font_path, 24)
         self.title_font = pygame.font.Font(font_path, 36)
         self.current_choice = 0

@@ -1,5 +1,6 @@
 import pygame
 import os
+from paths import asset
 import random
 from entities.enemy import Enemy
 from tilemap.tile import Tile
@@ -51,9 +52,7 @@ class Bat(Enemy):
 
     def _load_sprites(self):
         """Load bat sprite sheet"""
-        sprite_path = os.path.normpath(
-            os.path.join(os.path.dirname(__file__), "../../assets/sprites/bat.gif")
-        )
+        sprite_path = asset("sprites/bat.gif")
 
         if not os.path.exists(sprite_path):
             print("Error: Could not find bat.gif")

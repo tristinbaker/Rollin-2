@@ -5,6 +5,7 @@ Handles tile-based map rendering and collision detection
 import pygame
 import os
 from tilemap.tile import Tile
+from paths import asset
 
 
 class TileMap:
@@ -60,20 +61,7 @@ class TileMap:
         self.assets_path = self._find_assets_path()
 
     def _find_assets_path(self):
-        """Find the assets directory"""
-        # Need to go up two levels from tilemap/
-        possible_paths = [
-            "../../assets/",
-            "../../../res/",
-        ]
-
-        for path in possible_paths:
-            full_path = os.path.join(os.path.dirname(__file__), path)
-            full_path = os.path.normpath(full_path)
-            if os.path.isdir(full_path):
-                return full_path
-
-        return os.path.normpath(os.path.join(os.path.dirname(__file__), "../../assets/"))
+        return asset()
 
     def load_tiles(self, tileset_path):
         """

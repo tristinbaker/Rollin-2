@@ -4,7 +4,7 @@
  "layers":[
         {
          "compression":"zlib",
-         "data":"eJzt17sNwCAQA1BLVLAB2X+60DBC0iUT5IPeq3ydJVeXAAAAAAAAAAAAAADAd\/SWbO3tFgAAAPCMvSajXvc8c\/EXL+O+Lf93AOKhBCk=",
+         "data":"eJzt2j0KwkAQBtAFUUisLfQWFoIX05uYUnutFb2SNjb2TudPYaXZuLwHwy5JsQNfMwmbEgAAADk0Ve4OAAD4lls\/dwdlW8fsvMk4P48G+c4u2TkyvURto3bV67Nfmz9lOvuQ7yLeLeVfrFVk28i3WPvI9iBf4E8c65RO9WOdDnN3BAAA3TCO+XhS5+4CAADKUA1Tqv1\/hk57vzdzjX3Pd3Ex2rgTRXvuD7wT7g==",
          "encoding":"base64",
          "height":35,
          "id":16,
@@ -18,7 +18,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
+         "data":"eJzt2csNgzAMANBc2X+Ntue2O3WHZgN+iWPIe1JuiNjGOEiUAnk8llKedb2W0ZFskzneqNj27POu13zq+jaIKSK\/lvGu2ZtPVGyRNTi6b+R7eHSvUXW8g8jaeU70kvl74Qqy1+\/M7MieW4Tes3dkjSPOlRb5Ze7DtdjuXuMW+W29x4g+yPDtFVnjka4QIzn0ngWZz5wZ9J4Fs8wafXxvs\/QxAAAAAAAAtPTzfw0AgAn9ASXDXX8=",
          "encoding":"base64",
          "height":35,
          "id":17,
@@ -32,7 +32,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJzt1jEKg0AUBNAtdUnunAN4SM0ZktRZQbESLBJMhvdg2PbDMLClAAAAAAAAAAAAAEfd+rMv4JsG\/UbTbzb9wu8b206nJXebjfNonfa1lGd7X\/qN09Wt31rPvoZPW\/c7x37z2G82+81mv9n8n7N1S7dzx5eW6074T29DFRW3",
+         "data":"eJztWctOwzAQ5EgikABxBP6w3wAcuIHES+Iz4JOAbyg9cGIjGnWxvLPr1MF1siOtQm3HqT07O07Z23M4HA6Hw+FwOBwOh8PhcDgcDofD4XCUxGlbtn+X8Nb8jdfGfm9N65w6roi3l0hcU9xE2nLineb7YPGZcf4jyrFjihMh10r3j43F+npLe3oZiTuKe4oHikeKJ4rnzPwuab4viqb9va4yzz8nLIR2xO\/Y2G833HbXVsj1UOdTiG1rlcRniJL8Lte8avrledAH+sxzho+JjQsDzYfmboJcDf8OnyHlcm6U1i\/fH2nNy8i+ov3XeNPapNxJzQPUp3lReC4aevYprV++jxb9Ii1Je6rpSepH\/GpzaFrX+M119tkF\/Wo1K6zjEidIiyl1FWk5tQZI7f91ltwF\/Vr8d6iHpuaAJT9S2qS6Mxf\/5eu3+q\/mbbExkp8iXWratvpzrH9u+kVrDn0a8ZLih4h\/LTfQecpS2+fA7xmt85zFhaBf7tPankr8bDNWywNpLMq1jl\/+Xp\/ztzuOkvxaEfqvVjslHpGfIj4tuZFSt3sv4r4zlp5r4lfaZ7SfQ2qtpWaj8dqz+\/rMzx9jnbdq4ddSB7XaafFMjSeJO+1MED6P63dMP66BX\/T7lYUfq3dK2kYcpnDLrx2\/Q\/Tbe7bVr2vh1+qV0h4jL9TORsgDUrjnbZ1eh+i3zwlrPtTAb+z\/C5KHojoq8aGNsZybkPfHciLFf7lmv5vN\/RbUyK+ldmo8ShrVfB7VDek7xO7l+tX46uvXaqL8hu\/JU4juXZ+\/FxxQHArBa\/IU6\/NU8QO7w4f\/",
          "encoding":"base64",
          "height":35,
          "id":1,
@@ -46,7 +46,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztziEBAAAIA7AbmtI\/AwXwILYESwAAAAAAAAAAAAAA4Ieu6wEAAAAA7AbxIABq",
+         "data":"eJztzjEBAAAIA6C99jfwYugBCUgAAAAAAAAAgM92rgcAAAAAAAAAABT39wCe",
          "encoding":"base64",
          "height":35,
          "id":15,
@@ -60,7 +60,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
+         "data":"eJzt1sENACAIBEE+1mb\/HVmDiRG9zFTAh4UqAAAAAAAAeNcc3RMAaXa6cqJBOgYAkMePB3nsNQDc4eYCAAC\/W1CiAhU=",
          "encoding":"base64",
          "height":35,
          "id":3,
@@ -74,7 +74,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
+         "data":"eJzt2SESACAIBECKv\/bxJqsWbzDsVgrhjkIVAAAAAACwzdG9AT+RB1645Sg9T9IRAAAAAADgxC8BoI8bDAAZC03QBIo=",
          "encoding":"base64",
          "height":35,
          "id":13,
@@ -102,7 +102,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
+         "data":"eJztzrEJADAMBLGvXcXZf9hkC4OR4PpLAAAAAAAAAAAAAABgn1NJ\/25NnwAAAACwwQMWAABS",
          "encoding":"base64",
          "height":35,
          "id":18,
@@ -116,7 +116,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJzt0cENQFAURNG3\/v0XgRpQA2pAHaYJET\/nJLOf5FYBAAAAAAAAAAAAAAAAANCjoVWN2dS+fsIb5nRdslXfLm3pumeHvl060\/XKbn1\/5QFOLgnN",
+         "data":"eJzt1rENACAMA0HXqQj7DwtbIJQ76XuXTgAAAAAAAAAAAACAVUnfdr1eAgAAf\/GlAQCY4gDF5gCj",
          "encoding":"base64",
          "height":35,
          "id":4,
@@ -130,10 +130,24 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
+         "data":"eJztzjENAAAIA7Dd3PjXigySpVXQBAAAAAAAAHrtfA8AAAAAAAAAAABocMayAB8=",
          "encoding":"base64",
          "height":35,
          "id":5,
+         "name":"Opposite Horizontal Moving Platforms",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":120,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "compression":"zlib",
+         "data":"eJztzjENAAAIA7Dd3PjXigxCaBU0AQAAAAAAgDu6tgcAAAAAAAAAAAB8NMxSAB8=",
+         "encoding":"base64",
+         "height":35,
+         "id":21,
          "name":"Horizontal Moving Platforms",
          "opacity":1,
          "type":"tilelayer",
@@ -144,7 +158,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
+         "data":"eJzt2TEKwCAMAEAX39T\/\/6w4CB2E4pRE78DJCGJIMtgaAAAAAACQ3dNj97MZ951r99xubLW3gUjq5SzyWct3Nq5mpHzW9pdfAHLSr+E86hogDz0ZAICb+TMCiPUC2ucGzQ==",
          "encoding":"base64",
          "height":35,
          "id":8,
@@ -158,7 +172,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
+         "data":"eJzt2MEJAEAIA0E\/dnXYf1k2IRziTAX7TSIAAAAAAAAAAICNXv4uAAAAgBll457l3wAAADZp4wsAxg==",
          "encoding":"base64",
          "height":35,
          "id":9,
@@ -172,7 +186,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
+         "data":"eJzt2UENADAMAsB+Zmf+5dVDE5J1uXsDBqgCAAAAAAAAgD\/dk81PO8kdAAAAAAAAAPbyHcPbGkSnAQA=",
          "encoding":"base64",
          "height":35,
          "id":7,
@@ -186,7 +200,7 @@
         }, 
         {
          "compression":"zlib",
-         "data":"eJztwYEAAAAAw6D5U9\/gBFUBAAAAAAAAAAAAAAAAAAAA8AxBoAAB",
+         "data":"eJzt1aENACAQA8A3DIJi\/w1ZgE8IqUDcyYq6plUAAAAAQMoc53w1OZDT7Q8AXqW+5abHjwEAAAAAAAAAwP82c70A6w==",
          "encoding":"base64",
          "height":35,
          "id":6,
@@ -204,7 +218,7 @@
          "encoding":"base64",
          "height":35,
          "id":19,
-         "name":"Demone",
+         "name":"Demon",
          "opacity":1,
          "type":"tilelayer",
          "visible":true,
@@ -212,7 +226,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":20,
+ "nextlayerid":23,
  "nextobjectid":1,
  "orientation":"orthogonal",
  "renderorder":"right-down",

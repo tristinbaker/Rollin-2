@@ -1,5 +1,6 @@
 import pygame
 import os
+from paths import asset
 from entities.animation import Animation
 
 class Heart:
@@ -20,10 +21,7 @@ class Heart:
 
     def _load_sprites(self, sprite_path):
         if sprite_path is None:
-            sprite_path = os.path.normpath(
-                os.path.join(os.path.dirname(__file__),
-                             "../../assets/sprites/heart.png")
-            )
+            sprite_path = asset("sprites/heart.png")
         if not os.path.exists(sprite_path):
             print(f"Error: Could not find heart sprite at {sprite_path}")
             return

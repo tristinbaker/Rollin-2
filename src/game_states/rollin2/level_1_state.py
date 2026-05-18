@@ -4,6 +4,7 @@ Test level based on Rollin 1's Level 1 layout
 """
 import pygame
 import os
+from paths import asset
 from game_states.level_state import LevelState
 from tilemap.tilemap import TileMap
 from entities.player import Player
@@ -33,12 +34,42 @@ class Level1State(LevelState):
         # Set level physics
         self.underwater = False
 
-        # Load parallax background (Rollin 2 style)
-        self.load_parallax_layers([
-            ("background_day1.png", 0.0),   # Furthest back, static
-            ("background_day2.png", 0.5),   # Middle layer
-            ("background_day3.png", 0.95),  # Closest layer, nearly 1:1 with camera
-        ], subfolder="level_1")
+        S = "level_2"
+        SC = 0.74  # 324px source → 240px screen
+
+        TY = 115; MY = 184; WY = 124; FY = 203
+
+        self.bg_layers = []
+        self.load_parallax_layers([("Background Layer 6- Sky.png", 0.0)], subfolder=S, clear=False)
+        self.load_parallax_layers([("Background Layer 5- Sky.png", 0.05)], subfolder=S, clear=False)
+        self.load_parallax_layers([("Background Layer 4 - BrightEffect.png", 0.1)], subfolder=S, clear=False)
+        self.load_background_sprite("WindMill Animated - Spritesheet.png",
+            100, 100, 10, x=275, y=WY, scroll_speed=0.1, frame_delay=80, scale=0.45, subfolder=S)
+        self.load_parallax_layers([("Background Layer 3.png", 0.2)], subfolder=S, clear=False)
+        for x in [80, 300, 520, 740, 960]:
+            self.load_background_sprite("Pine Tree 1 - Spritesheet.png",
+                53, 102, 10, x=x, y=TY, scroll_speed=0.2, frame_delay=150, scale=SC, subfolder=S)
+        for x in [190, 430, 660, 880]:
+            self.load_background_sprite("Pine Tree 3 - Mini - Spritesheet.png",
+                53, 102, 10, x=x, y=MY, scroll_speed=0.2, frame_delay=150, scale=0.55, subfolder=S)
+        self.load_parallax_layers([("Background Layer 2.png", 0.35)], subfolder=S, clear=False)
+        for x in [60, 320, 580, 840, 1100]:
+            self.load_background_sprite("Oak Tree 1 - Spritesheet.png",
+                112, 102, 10, x=x, y=TY, scroll_speed=0.35, frame_delay=150, scale=SC, subfolder=S)
+        for x in [150, 430, 700, 970]:
+            self.load_background_sprite("Pine Tree 2 - Spritesheet.png",
+                53, 102, 10, x=x, y=TY, scroll_speed=0.35, frame_delay=150, scale=SC, subfolder=S)
+        self.load_parallax_layers([("Background Layer 1.png", 0.5)], subfolder=S, clear=False)
+        for x in [100, 380, 660, 940, 1220]:
+            self.load_background_sprite("Oak Tree 2 - Spritesheet.png",
+                112, 102, 10, x=x, y=TY, scroll_speed=0.5, frame_delay=150, scale=SC, subfolder=S)
+        self.load_parallax_layers([("Background Layer 0.png", 0.65)], subfolder=S, clear=False)
+        for x in [30, 160, 290, 420, 550, 680, 810]:
+            self.load_background_sprite("Fluers Two Variations - Spritesheet.png",
+                100, 50, 5, x=x, y=FY, scroll_speed=0.65, frame_delay=120, row=0, scale=SC, subfolder=S)
+        for x in [90, 220, 350, 480, 610, 740]:
+            self.load_background_sprite("Fluers Two Variations - Spritesheet.png",
+                100, 50, 5, x=x, y=FY, scroll_speed=0.65, frame_delay=120, row=1, scale=SC, subfolder=S)
 
         # Create tilemap (using Tiled format with 32x32 tiles)
         self.tilemap = TileMap(32)  # 32 pixel tiles for Rollin 2
@@ -65,7 +96,7 @@ class Level1State(LevelState):
         self.spawn_horizontal_platforms_from_layer()
         # Spawn hearts from "Hearts" layer
         self.spawn_hearts_from_layer()
-        if self.gsm.current_mode in ("demon", "hardcore"):
+        if self.gsm.current_mode in ("demon", "hc_demon"):
             self.spawn_demon_from_layer()
 
         # Set initial camera position immediately (no tweening)
@@ -91,7 +122,7 @@ class Level1State(LevelState):
         audio.play_music("rollin2_level1", loops=-1, fade_ms=1000)
 
         # Font for debug info
-        font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../assets/fonts/upheavtt.ttf"))
+        font_path = asset("fonts/upheavtt.ttf")
         self.font = pygame.font.Font(font_path, 14)
 
         # Load HUD assets
@@ -156,6 +187,7 @@ class Level1State(LevelState):
         # Update player (60 FPS = ~16.67ms per frame)
         self.player.update(16.67, self.gsm.audio_manager, self.moving_platforms)
         self.update_demon(16.67)
+        self.update_animated_backgrounds(16.67)
 
         # Update hearts
         self.update_hearts()
@@ -218,16 +250,8 @@ class Level1State(LevelState):
 
         # Draw win message if won
         if self.has_won:
-            font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../assets/fonts/upheavtt.ttf"))
-            win_font = pygame.font.Font(font_path, 32)
-            win_text = win_font.render("LEVEL COMPLETE!", True, (255, 255, 0))
-            win_rect = win_text.get_rect(center=(160, 100))
-            surface.blit(win_text, win_rect)
-
-            continue_text = self.font.render("Press ENTER to continue", True, (255, 255, 255))
-            continue_rect = continue_text.get_rect(center=(160, 140))
-            surface.blit(continue_text, continue_rect)
-            return  # Don't draw death screen if won
+            self.draw_win_overlay(surface, "Level 1")
+            return
 
         # Draw death screen if active
         self.draw_death_screen(surface)

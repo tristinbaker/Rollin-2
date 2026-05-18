@@ -5,6 +5,7 @@ Third level of the game (final main level)
 """
 import pygame
 import os
+from paths import asset
 from game_states.level_state import LevelState
 from tilemap.tilemap import TileMap
 from entities.player import Player
@@ -82,7 +83,7 @@ class Level3State(LevelState):
         audio.play_music("level3", loops=-1, fade_ms=1000)
 
         # Font for HUD
-        font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../assets/fonts/upheavtt.ttf"))
+        font_path = asset("fonts/upheavtt.ttf")
         self.font = pygame.font.Font(font_path, 14)
 
         # Load HUD assets
@@ -201,7 +202,7 @@ class Level3State(LevelState):
 
         # Draw win message if won
         if self.has_won:
-            font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../assets/fonts/upheavtt.ttf"))
+            font_path = asset("fonts/upheavtt.ttf")
             win_font = pygame.font.Font(font_path, 32)
             win_text = win_font.render("YOU WIN!", True, (255, 255, 0))
             win_rect = win_text.get_rect(center=(160, 60))
@@ -244,7 +245,7 @@ class Level3State(LevelState):
             surface.blit(overlay, (0, 0))
 
             # Draw "YOU DIED!" text
-            font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../assets/fonts/upheavtt.ttf"))
+            font_path = asset("fonts/upheavtt.ttf")
             death_font = pygame.font.Font(font_path, 48)
             death_text = death_font.render("YOU DIED!", True, (255, 0, 0))
             death_rect = death_text.get_rect(center=(160, 120))

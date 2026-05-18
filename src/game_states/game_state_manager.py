@@ -4,6 +4,7 @@ Manages game states and transitions between them
 """
 import json
 import os
+from paths import asset, save_file
 from game_states.menu_state import MenuState
 from game_states.rollin1.level1_state import Level1State as Rollin1Level1State
 from game_states.rollin1.level2_state import Level2State as Rollin1Level2State
@@ -67,20 +68,50 @@ class GameStateManager:
         self.rollin1_unlocked    = False
         self.demon_mode_unlocked = False
         self.hardcore_unlocked   = False
+        self.hc_demon_unlocked   = False
+        self.hc_demon_complete   = False
 
         # Current play mode (chosen per session, not persisted)
-        self.current_mode = "normal"  # "normal" | "demon" | "hardcore"
-        self.save_slot = None      # Mid-level save data, or None if no save exists
-        self.pending_load = None   # Set before set_state() to apply saved data after init
-        self._save_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../save.json'))
+        self.current_mode = "normal"
+        self.save_slot = None
+        self.pending_load = None
+        self._save_path = save_file("save.json")
+
+        # Level checkpoint — lightweight resume (level + mode + lives, no position)
+        self.level_checkpoint = None
+
+        # Set by level state on pause; used by pause menu for restart safety check
+        self.player_has_safe_ground = True
+
+        # Total coins across all Rollin 2 levels (computed once at startup)
+        self.grand_coin_total = self._compute_grand_coin_total()
 
         # Current state
-        self.current_state = self.ROLLIN2_LEVEL4_STATE
+        self.current_state = self.MENU_STATE
 
         # Load persistent progress before initializing states so the menu
         # reflects save/unlock state on first render
         self._load_progress()
         self._init_states()
+
+    def _compute_grand_coin_total(self):
+        import json, zlib, base64, struct
+        assets = asset()
+        maps = ["maps/level_1.tmj", "maps/level_2.tmj", "maps/level_3.tmj",
+                "maps/level_4.tmj", "maps/level_5.tmj"]
+        total = 0
+        for map_file in maps:
+            try:
+                with open(os.path.join(assets, map_file)) as f:
+                    data = json.load(f)
+                for layer in data.get("layers", []):
+                    if layer.get("name", "").lower() == "coins":
+                        raw = zlib.decompress(base64.b64decode(layer["data"]))
+                        tiles = struct.unpack(f'<{len(raw)//4}I', raw)
+                        total += sum(1 for t in tiles if t != 0)
+            except Exception:
+                pass
+        return total
 
     def _init_states(self):
         """Initialize all game states"""
@@ -105,6 +136,18 @@ class GameStateManager:
         """
         if 0 <= state < len(self.game_states):
             self.current_state = state
+
+            # Save a lightweight checkpoint whenever a Rollin 2 level starts
+            _r2_levels = {self.ROLLIN2_LEVEL1_STATE, self.ROLLIN2_LEVEL2_STATE,
+                          self.ROLLIN2_LEVEL3_STATE, self.ROLLIN2_LEVEL4_STATE,
+                          self.ROLLIN2_LEVEL5_STATE}
+            if state in _r2_levels:
+                self.level_checkpoint = {
+                    "state": state,
+                    "mode":  self.current_mode,
+                    "lives": self.lives,
+                }
+                self._save_progress()
 
             # Initialize state if it hasn't been created yet
             if self.game_states[state] is None:
@@ -189,6 +232,7 @@ class GameStateManager:
         """Add a completed level's coin counts to the run totals"""
         self.run_coins_collected += collected
         self.run_coins_total += total
+        self._save_progress()
 
     def unlock_rollin1(self):
         self.rollin1_unlocked = True
@@ -200,6 +244,14 @@ class GameStateManager:
 
     def unlock_hardcore(self):
         self.hardcore_unlocked = True
+        self._save_progress()
+
+    def unlock_hc_demon(self):
+        self.hc_demon_unlocked = True
+        self._save_progress()
+
+    def save_hc_demon_complete(self):
+        self.hc_demon_complete = True
         self._save_progress()
 
     def save_game(self, level_state_id, score, lives, run_coins_collected,
@@ -227,7 +279,14 @@ class GameStateManager:
             "rollin1_unlocked":    self.rollin1_unlocked,
             "demon_mode_unlocked": self.demon_mode_unlocked,
             "hardcore_unlocked":   self.hardcore_unlocked,
+            "hc_demon_unlocked":   self.hc_demon_unlocked,
+            "run_coins_collected": self.run_coins_collected,
+            "run_coins_total":     self.run_coins_total,
         }
+        if self.hc_demon_complete:
+            data["proof"] = "4920444944204954"
+        if self.level_checkpoint is not None:
+            data["level_checkpoint"] = self.level_checkpoint
         if self.save_slot is not None:
             data["save_slot"] = self.save_slot
         with open(self._save_path, 'w') as f:
@@ -240,4 +299,9 @@ class GameStateManager:
             self.rollin1_unlocked    = data.get("rollin1_unlocked", False)
             self.demon_mode_unlocked = data.get("demon_mode_unlocked", False)
             self.hardcore_unlocked   = data.get("hardcore_unlocked", False)
+            self.hc_demon_unlocked   = data.get("hc_demon_unlocked", False)
+            self.hc_demon_complete   = "proof" in data
             self.save_slot           = data.get("save_slot", None)
+            self.run_coins_collected = data.get("run_coins_collected", 0)
+            self.run_coins_total     = data.get("run_coins_total", 0)
+            self.level_checkpoint    = data.get("level_checkpoint", None)

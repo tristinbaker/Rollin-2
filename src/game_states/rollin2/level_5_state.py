@@ -1,18 +1,13 @@
 """
 Level 5 State for Rollin 2
-Basic boss arena — flat ground with a few static platforms.
-Designed for testing the boss + projectile system.
 """
 import pygame
 import os
+from paths import asset
 from game_states.level_state import LevelState
 from tilemap.tilemap import TileMap
 from entities.player import Player
-from entities.demon_boss import DemonBoss
-
-# Boss spawn: column 105, floating at mid-height above the arena
-BOSS_X = 105 * 32 + 16   # 3376
-BOSS_Y = 480              # floating start height
+from entities.level5_boss import Level5Boss
 
 
 class Level5State(LevelState):
@@ -44,14 +39,21 @@ class Level5State(LevelState):
         self.player.reset_hp()
         self.apply_mode_to_player()
 
+        self.spawn_coins_from_layer()
+        self.spawn_spikes_from_layer()
+        self.spawn_lava_from_layer()
+        self.spawn_slimes_from_layer()
+        self.spawn_bats_from_layer()
+        self.spawn_wasps_from_layer()
+        self.spawn_vertical_platforms_from_layer()
+        self.spawn_opposite_vertical_platforms_from_layer()
+        self.spawn_horizontal_platforms_from_layer()
+        self.spawn_opposite_horizontal_platforms_from_layer()
         self.spawn_hearts_from_layer()
-        if self.gsm.current_mode in ("demon", "hardcore"):
+        if self.gsm.current_mode in ("demon", "hc_demon"):
             self.spawn_demon_from_layer()
 
-        # Boss + active projectile list
-        self.boss = DemonBoss(self.tilemap)
-        self.boss.set_position(BOSS_X, BOSS_Y)
-        self.projectiles = []
+        self.level5_boss = Level5Boss(self.tilemap)
 
         self.tilemap.set_position_immediate(
             160 - self.player.get_x(),
@@ -60,7 +62,7 @@ class Level5State(LevelState):
 
         audio = self.gsm.audio_manager
         if "rollin2_level5" not in audio.music_clips:
-            audio.load_music("rollin2_level5", "Level_4.wav")
+            audio.load_music("rollin2_level5", "Level_5.wav")
         if "win" not in audio.sound_effects:
             audio.load_sound("win", "rollin1/win.wav")
         if "finalwin" not in audio.sound_effects:
@@ -75,7 +77,7 @@ class Level5State(LevelState):
             audio.load_sound("jump", "Jump.wav", relative_volume=0.2)
         audio.play_music("rollin2_level5", loops=-1, fade_ms=1000)
 
-        font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../assets/fonts/upheavtt.ttf"))
+        font_path = asset("fonts/upheavtt.ttf")
         self.font = pygame.font.Font(font_path, 14)
         self.load_hud_assets()
         self.has_won = False
@@ -88,23 +90,31 @@ class Level5State(LevelState):
         self.player.underwater = self.underwater
         self.handle_player_input()
         self.update_coins()
-
-        # Update boss
-        self.boss.update(16.67, self.projectiles)
-
-        # Boss body contact damages player
-        if not self.boss.is_dead() and self.player.hit_spike(self.boss):
-            if self.player.take_damage(self.boss.get_x()):
-                self.gsm.audio_manager.play_sound("playerhit")
-
-        # Update projectiles and check player collisions
-        for proj in self.projectiles:
-            proj.update(16.67)
-            if proj.active and self.player.hit_spike(proj):
-                if self.player.take_damage(proj.get_x()):
+        for platform in self.moving_platforms:
+            platform.update(16.67)
+        for spike in self.spikes:
+            spike.update(16.67)
+        for lava_tile in self.lava:
+            lava_tile.update(16.67)
+        for enemy in self.enemies:
+            enemy.update(16.67, self.spikes, self.moving_platforms)
+        for spike in self.spikes:
+            if self.player.hit_spike(spike):
+                if self.player.take_damage(spike.get_x()):
                     self.gsm.audio_manager.play_sound("playerhit")
-                proj.active = False
-        self.projectiles = [p for p in self.projectiles if p.active]
+        for lava_tile in self.lava:
+            if self.player.hit_spike(lava_tile):
+                if self.player.touch_lava():
+                    self.gsm.audio_manager.play_sound("playerhit")
+        for enemy in self.enemies:
+            if self.player.hit_spike(enemy):
+                if self.player.take_damage(enemy.get_x()):
+                    self.gsm.audio_manager.play_sound("playerhit")
+
+        self.level5_boss.update(16.67)
+        if self.player.hit_spike(self.level5_boss):
+            if self.player.take_damage(self.level5_boss.get_x()):
+                self.gsm.audio_manager.play_sound("playerhit")
 
         self.player.update(16.67, self.gsm.audio_manager, self.moving_platforms)
         self.update_demon(16.67)
@@ -123,40 +133,54 @@ class Level5State(LevelState):
     def draw(self, surface):
         self.draw_background(surface)
         self.tilemap.draw_with_lava_entities(surface, self.lava)
+        for platform in self.moving_platforms:
+            platform.draw(surface)
+        for spike in self.spikes:
+            spike.draw(surface)
+        for enemy in self.enemies:
+            enemy.draw(surface)
         for coin in self.coins:
             coin.draw(surface)
-        self.boss.draw(surface)
-        for proj in self.projectiles:
-            proj.draw(surface)
+        self.level5_boss.draw(surface)
         self.draw_demon(surface)
         self.player.draw(surface)
         self.draw_hud(surface)
         if self.has_won:
-            font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../assets/fonts/upheavtt.ttf"))
-            win_font = pygame.font.Font(font_path, 32)
-            if self.completion_code:
+            font_path = asset("fonts/upheavtt.ttf")
+            mode = self.gsm.current_mode
+            is_perfect = (self.gsm.run_coins_total > 0 and
+                          self.gsm.run_coins_collected == self.gsm.run_coins_total)
+            if mode == "hc_demon" and getattr(self, 'unlocked_this_run', False):
                 overlay = pygame.Surface((320, 240))
-                overlay.set_alpha(200)
+                overlay.set_alpha(210)
                 overlay.fill((0, 0, 0))
                 surface.blit(overlay, (0, 0))
                 hc_font = pygame.font.Font(font_path, 20)
                 lines = [
-                    ("HARDCORE COMPLETE!", (255, 215, 0), hc_font),
-                    (self.completion_code, (255, 80, 255), self.font),
-                    ("DM this code to Tristin on Discord", (255, 255, 255), self.font),
-                    ("and he'll Venmo you $1!", (255, 255, 255), self.font),
+                    ("YOU DID IT.", (255, 50, 50), hc_font),
+                    ("Send your save file to Tristin", (255, 255, 255), self.font),
+                    ("as proof to claim your $5.", (255, 255, 255), self.font),
                     ("Press ENTER to continue", (180, 180, 180), self.font),
                 ]
-                y = 70
+                y = 85
                 for text, color, fnt in lines:
                     surf = fnt.render(text, True, color)
                     surface.blit(surf, surf.get_rect(center=(160, y)))
                     y += 26
             else:
-                win_text = win_font.render("LEVEL COMPLETE!", True, (255, 255, 0))
-                surface.blit(win_text, win_text.get_rect(center=(160, 100)))
-                continue_text = self.font.render("Press ENTER to continue", True, (255, 255, 255))
-                surface.blit(continue_text, continue_text.get_rect(center=(160, 140)))
+                if is_perfect and mode == "normal":
+                    extra_line  = "You've unlocked Rollin 1!"
+                    extra_color = (100, 255, 150)
+                elif is_perfect and mode == "demon":
+                    extra_line  = "You've unlocked Hardcore Mode!"
+                    extra_color = (255, 100, 255)
+                elif mode == "hardcore":
+                    extra_line  = "You've unlocked HC Demon Mode!"
+                    extra_color = (255, 60, 60)
+                else:
+                    extra_line  = "Get all coins to unlock something special!"
+                    extra_color = (255, 220, 80)
+                self.draw_win_overlay(surface, "Level 5", extra_line=extra_line, extra_color=extra_color)
             return
         self.draw_death_screen(surface)
         self.draw_hearts(surface)

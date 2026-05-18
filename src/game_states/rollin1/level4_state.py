@@ -5,6 +5,7 @@ Secret level of the game (unlocked by collecting all 19 coins in Level 3)
 """
 import pygame
 import os
+from paths import asset
 from game_states.level_state import LevelState
 from tilemap.tilemap import TileMap
 from entities.player import Player
@@ -152,7 +153,7 @@ class Level4State(LevelState):
         audio.play_music("level4", loops=-1, fade_ms=1000)
 
         # Font for HUD
-        font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../assets/fonts/upheavtt.ttf"))
+        font_path = asset("fonts/upheavtt.ttf")
         self.font = pygame.font.Font(font_path, 14)
 
         # Load HUD assets
@@ -283,33 +284,32 @@ class Level4State(LevelState):
 
         # Draw win message if won
         if self.has_won:
-            font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../assets/fonts/upheavtt.ttf"))
+            font_path = asset("fonts/upheavtt.ttf")
             win_font = pygame.font.Font(font_path, 24)
 
             congrats_text = win_font.render("Congratulations!", True, (0, 0, 0))
-            congrats_rect = congrats_text.get_rect(center=(160, 100))
-            surface.blit(congrats_text, congrats_rect)
+            surface.blit(congrats_text, congrats_text.get_rect(center=(160, 90)))
 
-            completed_text = self.font.render("You completed the secret", True, (0, 0, 0))
-            completed_rect = completed_text.get_rect(center=(160, 120))
-            surface.blit(completed_text, completed_rect)
+            completed_text = self.font.render("You completed the secret level of Rollin' 1!", True, (0, 0, 0))
+            surface.blit(completed_text, completed_text.get_rect(center=(160, 114)))
 
-            level_text = self.font.render("level of Rollin' with", True, (0, 0, 0))
-            level_rect = level_text.get_rect(center=(160, 140))
-            surface.blit(level_text, level_rect)
-
-            score_text = self.font.render(f"a total score of: {self.gsm.get_score()}", True, (0, 0, 0))
-            score_rect = score_text.get_rect(center=(160, 160))
-            surface.blit(score_text, score_rect)
+            score_text = self.font.render(f"Total score: {self.gsm.get_score()}", True, (0, 0, 0))
+            surface.blit(score_text, score_text.get_rect(center=(160, 131)))
 
             thanks_text = self.font.render("Thank you for playing!", True, (0, 0, 0))
-            thanks_rect = thanks_text.get_rect(center=(160, 180))
-            surface.blit(thanks_text, thanks_rect)
+            surface.blit(thanks_text, thanks_text.get_rect(center=(160, 148)))
 
-            continue_text = self.font.render("Press ENTER to continue", True, (0, 0, 0))
-            continue_rect = continue_text.get_rect(center=(160, 200))
-            surface.blit(continue_text, continue_rect)
-            return  # Don't draw death screen if won
+            is_perfect = (self.gsm.run_coins_total > 0 and
+                          self.gsm.run_coins_collected == self.gsm.run_coins_total)
+            if is_perfect:
+                unlock_text = self.font.render("You've unlocked Demon Mode!", True, (255, 120, 40))
+            else:
+                unlock_text = self.font.render("Get all coins to unlock something special!", True, (255, 220, 80))
+            surface.blit(unlock_text, unlock_text.get_rect(center=(160, 168)))
+
+            continue_text = self.font.render("Press ENTER to continue", True, (100, 100, 100))
+            surface.blit(continue_text, continue_text.get_rect(center=(160, 188)))
+            return
 
         # Draw death screen if active
         if self.death_screen_timer > 0:
@@ -320,7 +320,7 @@ class Level4State(LevelState):
             surface.blit(overlay, (0, 0))
 
             # Draw "YOU DIED!" text
-            font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../assets/fonts/upheavtt.ttf"))
+            font_path = asset("fonts/upheavtt.ttf")
             death_font = pygame.font.Font(font_path, 48)
             death_text = death_font.render("YOU DIED!", True, (255, 0, 0))
             death_rect = death_text.get_rect(center=(160, 120))

@@ -23,11 +23,17 @@ class Game:
     def __init__(self):
         pygame.init()
 
-        # Create resizable window
+        # Create resizable window, maximized
+        info = pygame.display.Info()
         self.window = pygame.display.set_mode(
-            (self.WINDOW_WIDTH, self.WINDOW_HEIGHT),
+            (info.current_w, info.current_h),
             pygame.RESIZABLE
         )
+        import sys
+        if sys.platform == "win32":
+            import ctypes
+            ctypes.windll.user32.ShowWindow(
+                pygame.display.get_wm_info()["window"], 3)  # SW_MAXIMIZE
         pygame.display.set_caption("Rollin' - Python Edition")
 
         # Create game surface (internal resolution - always 320x240)

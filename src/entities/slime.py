@@ -1,5 +1,6 @@
 import pygame
 import os
+from paths import asset
 from entities.enemy import Enemy
 from tilemap.tile import Tile
 
@@ -25,9 +26,7 @@ class Slime(Enemy):
 
     def _load_sprites(self):
         """Load slime sprite sheet"""
-        sprite_path = os.path.normpath(
-            os.path.join(os.path.dirname(__file__), "../../assets/sprites/slime.png")
-        )
+        sprite_path = asset("sprites/slime.png")
 
         if not os.path.exists(sprite_path):
             print("Error: Could not find slime.png")

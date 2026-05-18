@@ -4,6 +4,7 @@ Autumn-themed level — harder than Level 3, introduces a brutal thin-path gaunt
 """
 import pygame
 import os
+from paths import asset
 from game_states.level_state import LevelState
 from tilemap.tilemap import TileMap
 from entities.player import Player
@@ -46,7 +47,7 @@ class Level4State(LevelState):
         self.spawn_opposite_vertical_platforms_from_layer()
         self.spawn_horizontal_platforms_from_layer()
         self.spawn_hearts_from_layer()
-        if self.gsm.current_mode in ("demon", "hardcore"):
+        if self.gsm.current_mode in ("demon", "hc_demon"):
             self.spawn_demon_from_layer()
 
         self.tilemap.set_position_immediate(
@@ -56,7 +57,7 @@ class Level4State(LevelState):
 
         audio = self.gsm.audio_manager
         if "rollin2_level4" not in audio.music_clips:
-            audio.load_music("rollin2_level4", "rollin1/Level3.wav")
+            audio.load_music("rollin2_level4", "Level_4.wav")
         if "win" not in audio.sound_effects:
             audio.load_sound("win", "rollin1/win.wav")
         if "coin" not in audio.sound_effects:
@@ -69,7 +70,7 @@ class Level4State(LevelState):
             audio.load_sound("jump", "Jump.wav", relative_volume=0.2)
         audio.play_music("rollin2_level4", loops=-1, fade_ms=1000)
 
-        font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../assets/fonts/upheavtt.ttf"))
+        font_path = asset("fonts/upheavtt.ttf")
         self.font = pygame.font.Font(font_path, 14)
         self.load_hud_assets()
         self.has_won = False
@@ -131,12 +132,7 @@ class Level4State(LevelState):
         self.player.draw(surface)
         self.draw_hud(surface)
         if self.has_won:
-            font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../assets/fonts/upheavtt.ttf"))
-            win_font = pygame.font.Font(font_path, 32)
-            win_text = win_font.render("LEVEL COMPLETE!", True, (255, 255, 0))
-            surface.blit(win_text, win_text.get_rect(center=(160, 100)))
-            continue_text = self.font.render("Press ENTER to continue", True, (255, 255, 255))
-            surface.blit(continue_text, continue_text.get_rect(center=(160, 140)))
+            self.draw_win_overlay(surface, "Level 4")
             return
         self.draw_death_screen(surface)
         self.draw_hearts(surface)

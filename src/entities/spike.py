@@ -1,5 +1,6 @@
 import pygame
 import os
+from paths import asset
 
 
 class Spike:
@@ -39,9 +40,7 @@ class Spike:
 
     def _load_sprite_sheet(self):
         """Load spike sprite sheet and extract individual frames"""
-        sprite_path = os.path.normpath(
-            os.path.join(os.path.dirname(__file__), "../../assets/sprites/spike.png")
-        )
+        sprite_path = asset("sprites/spike.png")
 
         if not os.path.exists(sprite_path):
             print("Error: Could not find spike.png")

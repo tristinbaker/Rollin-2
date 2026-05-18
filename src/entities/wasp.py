@@ -1,5 +1,6 @@
 import pygame
 import os
+from paths import asset
 import math
 from entities.enemy import Enemy
 
@@ -45,9 +46,7 @@ class Wasp(Enemy):
 
     def _load_sprites(self):
         """Load wasp sprite sheet"""
-        sprite_path = os.path.normpath(
-            os.path.join(os.path.dirname(__file__), f"../../assets/sprites/wasp_{self.color}.png")
-        )
+        sprite_path = asset(f"sprites/wasp_{self.color}.png")
 
         if not os.path.exists(sprite_path):
             print(f"Error: Could not find wasp_{self.color}.png")

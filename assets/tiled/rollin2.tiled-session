@@ -12,47 +12,47 @@
             "scaleInDock": 1
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/hell.tsx": {
-            "scaleInDock": 3,
+            "scaleInDock": 1.5,
             "scaleInEditor": 1
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_1.tmj": {
             "scale": 1.5,
-            "selectedLayer": 13,
+            "selectedLayer": 12,
             "viewCenter": {
-                "x": 2713,
-                "y": 695.6666666666665
+                "x": 1500.333333333333,
+                "y": 867.6666666666665
             }
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_2.tmj": {
-            "scale": 0.5,
-            "selectedLayer": 14,
+            "scale": 1,
+            "selectedLayer": 5,
             "viewCenter": {
-                "x": 1951,
-                "y": 663
+                "x": 3205.5,
+                "y": 490.5
             }
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_3.tmj": {
-            "scale": 1.5,
-            "selectedLayer": 13,
+            "scale": 0.75,
+            "selectedLayer": 5,
             "viewCenter": {
-                "x": 383,
-                "y": 357.6666666666667
+                "x": 2836.6666666666665,
+                "y": 354
             }
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_4.tmj": {
-            "scale": 2,
-            "selectedLayer": 1,
+            "scale": 0.75,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 584.25,
-                "y": 872.25
+                "x": 3292.666666666666,
+                "y": 704.6666666666665
             }
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/level_5.tmj": {
-            "scale": 1.5,
-            "selectedLayer": 8,
+            "scale": 1,
+            "selectedLayer": 5,
             "viewCenter": {
-                "x": -199.66666666666663,
-                "y": 823
+                "x": 2586.5,
+                "y": 520.5
             }
         },
         "/home/tristinb/Programming/Python/Rollin2/assets/maps/swamp.tsx": {

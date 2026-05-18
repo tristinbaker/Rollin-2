@@ -4,6 +4,7 @@ Setup is similar to Level 1 and Level 2
 """
 import pygame
 import os
+from paths import asset
 from game_states.level_state import LevelState
 from tilemap.tilemap import TileMap
 from entities.player import Player
@@ -53,7 +54,7 @@ class Level3State(LevelState):
         self.spawn_opposite_vertical_platforms_from_layer()
         self.spawn_horizontal_platforms_from_layer()
         self.spawn_hearts_from_layer()
-        if self.gsm.current_mode in ("demon", "hardcore"):
+        if self.gsm.current_mode in ("demon", "hc_demon"):
             self.spawn_demon_from_layer()
 
         # Set initial camera position
@@ -65,7 +66,7 @@ class Level3State(LevelState):
         # Load and play level music
         audio = self.gsm.audio_manager
         if "rollin2_level3" not in audio.music_clips:
-            audio.load_music("rollin2_level3", "Level_2.wav")
+            audio.load_music("rollin2_level3", "Level_3.wav")
         if "win" not in audio.sound_effects:
             audio.load_sound("win", "rollin1/win.wav")
         if "coin" not in audio.sound_effects:
@@ -79,7 +80,7 @@ class Level3State(LevelState):
         audio.play_music("rollin2_level3", loops=-1, fade_ms=1000)
 
         # Font for debug info
-        font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../assets/fonts/upheavtt.ttf"))
+        font_path = asset("fonts/upheavtt.ttf")
         self.font = pygame.font.Font(font_path, 14)
         self.load_hud_assets()
         self.has_won = False
@@ -144,14 +145,7 @@ class Level3State(LevelState):
         self.player.draw(surface)
         self.draw_hud(surface)
         if self.has_won:
-            font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../assets/fonts/upheavtt.ttf"))
-            win_font = pygame.font.Font(font_path, 32)
-            win_text = win_font.render("LEVEL COMPLETE!", True, (255, 255, 0))
-            win_rect = win_text.get_rect(center=(160, 100))
-            surface.blit(win_text, win_rect)
-            continue_text = self.font.render("Press ENTER to continue", True, (255, 255, 255))
-            continue_rect = continue_text.get_rect(center=(160, 140))
-            surface.blit(continue_text, continue_rect)
+            self.draw_win_overlay(surface, "Level 3")
             return
         self.draw_death_screen(surface)
         self.draw_hearts(surface)

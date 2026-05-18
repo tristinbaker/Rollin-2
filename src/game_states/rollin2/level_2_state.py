@@ -3,6 +3,7 @@ Level 2 State for Rollin 2
 """
 import pygame
 import os
+from paths import asset
 from game_states.level_state import LevelState
 from tilemap.tilemap import TileMap
 from entities.player import Player
@@ -31,11 +32,10 @@ class Level2State(LevelState):
         # Set level physics
         self.underwater = False
 
-        # Load parallax background (Rollin 2 style)
         self.load_parallax_layers([
-            ("background_day1.png", 0.0),   # Furthest back, static
-            ("background_day2.png", 0.5),   # Middle layer
-            ("background_day3.png", 0.95),  # Closest layer, nearly 1:1 with camera
+            ("background_day1.png", 0.0),
+            ("background_day2.png", 0.5),
+            ("background_day3.png", 0.95),
         ], subfolder="level_1")
 
         # Create tilemap (using Tiled format with 32x32 tiles)
@@ -62,7 +62,7 @@ class Level2State(LevelState):
         self.spawn_opposite_vertical_platforms_from_layer()
         self.spawn_horizontal_platforms_from_layer()
         self.spawn_hearts_from_layer()
-        if self.gsm.current_mode in ("demon", "hardcore"):
+        if self.gsm.current_mode in ("demon", "hc_demon"):
             self.spawn_demon_from_layer()
 
         # Set initial camera position immediately (no tweening)
@@ -88,7 +88,7 @@ class Level2State(LevelState):
         audio.play_music("rollin2_level2", loops=-1, fade_ms=1000)
 
         # Font for debug info
-        font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../assets/fonts/upheavtt.ttf"))
+        font_path = asset("fonts/upheavtt.ttf")
         self.font = pygame.font.Font(font_path, 14)
 
         # Load HUD assets
@@ -214,16 +214,8 @@ class Level2State(LevelState):
 
         # Draw win message if won
         if self.has_won:
-            font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../assets/fonts/upheavtt.ttf"))
-            win_font = pygame.font.Font(font_path, 32)
-            win_text = win_font.render("LEVEL COMPLETE!", True, (255, 255, 0))
-            win_rect = win_text.get_rect(center=(160, 100))
-            surface.blit(win_text, win_rect)
-
-            continue_text = self.font.render("Press ENTER to continue", True, (255, 255, 255))
-            continue_rect = continue_text.get_rect(center=(160, 140))
-            surface.blit(continue_text, continue_rect)
-            return  # Don't draw death screen if won
+            self.draw_win_overlay(surface, "Level 2")
+            return
 
         # Draw death screen if active
         self.draw_death_screen(surface)

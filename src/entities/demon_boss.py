@@ -1,5 +1,6 @@
 import pygame
 import os
+from paths import asset
 import math
 from entities.enemy import Enemy
 from entities.animation import Animation
@@ -55,9 +56,7 @@ class DemonBoss(Enemy):
     # ------------------------------------------------------------------
 
     def _load_sprites(self):
-        path = os.path.normpath(
-            os.path.join(os.path.dirname(__file__), "../../assets/sprites/demon.png")
-        )
+        path = asset("sprites/demon.png")
         if not os.path.exists(path):
             print("DemonBoss: demon.png not found")
             return

@@ -1,5 +1,6 @@
 import pygame
 import os
+from paths import asset
 from entities.animation import Animation
 from handlers.player_collision_handler import PlayerCollisionHandler
 from handlers.player_physics_handler import PlayerPhysicsHandler
@@ -88,7 +89,7 @@ class Player:
 
     def _load_sprites(self):
         """Load player sprite sheet"""
-        sprite_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../assets/sprites/playerSprites.gif"))
+        sprite_path = asset("sprites/playerSprites.gif")
 
         if not os.path.exists(sprite_path):
             print("Error: Could not find playerSprites.gif")

@@ -1,5 +1,6 @@
 import pygame
 import os
+from paths import asset
 from entities.animation import Animation
 
 
@@ -28,10 +29,7 @@ class Coin:
 
     def _load_sprites(self, color):
         """Load coin sprite sheet"""
-        sprite_path = os.path.normpath(
-            os.path.join(os.path.dirname(__file__),
-                        f"../../assets/sprites/{color}Coin.gif")
-        )
+        sprite_path = asset(f"sprites/{color}Coin.gif")
 
         if not os.path.exists(sprite_path):
             print(f"Error: Could not find {color}Coin.gif")

@@ -4,12 +4,8 @@ Contains common level functionality like underwater physics flag
 """
 import pygame
 import os
-import hmac
-import hashlib
-import base64
+from paths import asset
 from game_states.game_state import GameState
-
-_HARDCORE_SECRET = b"rollin2_hardcore_tdb"
 from entities.spike import Spike
 from entities.slime import Slime
 from entities.bat import Bat
@@ -53,7 +49,6 @@ class LevelState(GameState):
         self.level_start_score = 0  # Score at the start of this level
         self.demon = None              # Chasing demon in demon/hardcore mode
         self.demon_projectiles = []    # Projectiles fired by the demon
-        self.completion_code = None    # Set on hardcore 100% run
 
     # ------------------------------------------------------------------
     # Demon (persistent chaser across Rollin 2 levels)
@@ -61,7 +56,7 @@ class LevelState(GameState):
 
     def apply_mode_to_player(self):
         """Call after player is created and reset_hp() is called."""
-        self.player.hardcore = (self.gsm.current_mode == "hardcore")
+        self.player.hardcore = (self.gsm.current_mode in ("hardcore", "hc_demon"))
         if self.player.hardcore:
             self.player.hp = 1
 
@@ -113,6 +108,8 @@ class LevelState(GameState):
             heart.update(self)
 
     def draw_hearts(self, surface):
+        if self.death_screen_timer > 0:
+            return
         for heart in self.hearts:
             heart.draw(surface)
 
@@ -128,10 +125,7 @@ class LevelState(GameState):
             scroll_speed: Parallax scroll speed (0.0 = static, 1.0 = moves with camera)
             subfolder: Subfolder within backgrounds/ (default: "rollin1")
         """
-        bg_path = os.path.normpath(os.path.join(
-            os.path.dirname(__file__),
-            f"../../assets/backgrounds/{subfolder}/{filename}"
-        ))
+        bg_path = asset(f"backgrounds/{subfolder}/{filename}")
 
         if os.path.exists(bg_path):
             self.simple_background = pygame.image.load(bg_path).convert()
@@ -142,9 +136,8 @@ class LevelState(GameState):
             self.simple_background = None
 
     def _bg_path(self, filename, subfolder):
-        base = f"../../assets/backgrounds"
         rel = f"{subfolder}/{filename}" if subfolder else filename
-        return os.path.normpath(os.path.join(os.path.dirname(__file__), base, rel))
+        return asset(f"backgrounds/{rel}")
 
     def _scale_to_height(self, image, target_height=240):
         h = image.get_height()
@@ -193,9 +186,40 @@ class LevelState(GameState):
                 "frame_idx": 0,
             })
 
+    def load_background_sprite(self, filename, frame_w, frame_h, num_frames,
+                               x, y, scroll_speed, frame_delay=150,
+                               row=0, scale=1.0, subfolder=None):
+        """Add a spritesheet-based animated sprite at a fixed background position.
+
+        x is in world-parallax space: screen_x = x + tilemap.x * scroll_speed
+        y is a fixed screen coordinate (no vertical parallax).
+        """
+        path = self._bg_path(filename, subfolder)
+        if not os.path.exists(path):
+            print(f"Warning: Background sprite not found: {path}")
+            return
+        sheet = pygame.image.load(path).convert_alpha()
+        frames = []
+        for i in range(num_frames):
+            frame = sheet.subsurface((i * frame_w, row * frame_h, frame_w, frame_h)).copy()
+            if scale != 1.0:
+                frame = pygame.transform.scale(frame,
+                    (max(1, int(frame_w * scale)), max(1, int(frame_h * scale))))
+            frames.append(frame)
+        self.bg_layers.append({
+            "type": "sprite",
+            "frames": frames,
+            "x": float(x),
+            "y": float(y),
+            "scroll_speed": scroll_speed,
+            "frame_delay": frame_delay,
+            "timer": 0.0,
+            "frame_idx": 0,
+        })
+
     def update_animated_backgrounds(self, dt):
         for layer in self.bg_layers:
-            if layer["type"] == "animated":
+            if layer["type"] in ("animated", "sprite"):
                 layer["timer"] += dt
                 if layer["timer"] >= layer["frame_delay"]:
                     layer["timer"] -= layer["frame_delay"]
@@ -231,6 +255,15 @@ class LevelState(GameState):
 
         for layer in self.bg_layers:
             scroll_speed = layer["scroll_speed"]
+
+            if layer["type"] == "sprite":
+                image = layer["frames"][layer["frame_idx"]]
+                screen_x = int(layer["x"] + self.tilemap.x * scroll_speed)
+                screen_y = int(layer["y"])
+                if -image.get_width() < screen_x < 320:
+                    surface.blit(image, (screen_x, screen_y))
+                continue
+
             image = layer["frames"][layer["frame_idx"]] if layer["type"] == "animated" else layer["image"]
 
             offset_x  = camera_x * scroll_speed
@@ -247,7 +280,7 @@ class LevelState(GameState):
     def load_hud_assets(self):
         """Load HUD sprites and icons - call this from subclass init()"""
         # Load health sprite
-        health_sprite_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../assets/sprites/health.png"))
+        health_sprite_path = asset("sprites/health.png")
         if os.path.exists(health_sprite_path):
             health_sheet = pygame.image.load(health_sprite_path).convert_alpha()
             # Each row is 120x36 (120 width, 144 total height / 4 rows = 36 per row)
@@ -260,7 +293,7 @@ class LevelState(GameState):
             self.health_sprites = None
 
         # Load coin HUD icon
-        coin_hud_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../assets/sprites/hud_coin.png"))
+        coin_hud_path = asset("sprites/hud_coin.png")
         if os.path.exists(coin_hud_path):
             self.coin_hud_icon = pygame.image.load(coin_hud_path).convert_alpha()
         else:
@@ -268,7 +301,7 @@ class LevelState(GameState):
             self.coin_hud_icon = None
 
         # Load life icon (first sprite from player sprite sheet)
-        player_sprite_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../assets/sprites/playerSprites.gif"))
+        player_sprite_path = asset("sprites/playerSprites.gif")
         if os.path.exists(player_sprite_path):
             player_sheet = pygame.image.load(player_sprite_path).convert_alpha()
             # Extract first sprite (30x30 pixels at position 0,0)
@@ -289,7 +322,7 @@ class LevelState(GameState):
 
         # HP - Display health sprite instead of text
         if self.health_sprites:
-            if self.gsm.current_mode == "hardcore":
+            if self.gsm.current_mode in ("hardcore", "hc_demon"):
                 # Hardcore: always 1/1 HP — show a single heart (full)
                 health_sprite = self.health_sprites[0]
                 scaled_sprite = pygame.transform.scale(health_sprite, (60, 18))
@@ -622,9 +655,8 @@ class LevelState(GameState):
         groups = self._group_adjacent_platforms(platform_data)
         
         for group in groups:
-            # Assign random direction to this group
             group_direction = random.choice([-1, 1])
-            
+
             for x, y, tile_id in group:
                 platform = HorizontalMovingPlatform(self.tilemap, tile_id)
                 platform.set_position(x, y)
@@ -632,6 +664,24 @@ class LevelState(GameState):
                 self.moving_platforms.append(platform)
         
         # Automatically attach spikes to platforms if both exist
+        self._auto_attach_spikes_to_platforms()
+
+    def spawn_opposite_horizontal_platforms_from_layer(self, layer_name="Opposite Horizontal Moving Platforms"):
+        """Spawn horizontal moving platforms where each group starts going the opposite of a random direction."""
+        import random
+
+        platform_data = self.tilemap.get_entity_positions_with_tiles(layer_name)
+        groups = self._group_adjacent_platforms(platform_data)
+
+        for group in groups:
+            group_direction = -random.choice([-1, 1])
+
+            for x, y, tile_id in group:
+                platform = HorizontalMovingPlatform(self.tilemap, tile_id)
+                platform.set_position(x, y)
+                platform.direction = group_direction
+                self.moving_platforms.append(platform)
+
         self._auto_attach_spikes_to_platforms()
 
     def attach_spikes_to_platforms(self):
@@ -644,15 +694,23 @@ class LevelState(GameState):
         if self.spikes and self.moving_platforms:
             self.attach_spikes_to_platforms()
 
+    def _has_safe_ground_below(self):
+        from tilemap.tile import Tile
+        ts = self.tilemap.tile_size
+        feet_row = int((self.player.get_y() + self.player.cheight / 2) / ts)
+        col = int(self.player.get_x() / ts)
+        for row in range(feet_row, feet_row + 13):
+            if self.tilemap.get_type(row, col) == Tile.BLOCKED:
+                return True
+        return False
+
     def check_pause(self):
         """Check for pause input - call this in subclass update methods"""
         input_handler = self.gsm.input_handler
         if input_handler.is_pressed(input_handler.BUTTON2):  # Escape
-            # Store current state before switching
+            self.gsm.player_has_safe_ground = self._has_safe_ground_below()
             current = self.gsm.current_state
-            # Switch to pause state
             self.gsm.set_state(self.gsm.PAUSE_STATE)
-            # Set previous state AFTER init() has been called
             if self.gsm.game_states[self.gsm.PAUSE_STATE]:
                 self.gsm.game_states[self.gsm.PAUSE_STATE].set_previous_state(current)
 
@@ -672,6 +730,10 @@ class LevelState(GameState):
                 self.gsm.lose_life()
                 self.gsm.set_score(self.level_start_score)
                 if self.gsm.get_lives() <= 0:
+                    if self.gsm.current_mode == "hardcore":
+                        self.gsm.level_checkpoint = None
+                        self.gsm.save_slot = None
+                        self.gsm._save_progress()
                     self.gsm.set_lives(5)
                     self.gsm.set_state(self.gsm.MENU_STATE)
                 else:
@@ -758,18 +820,22 @@ class LevelState(GameState):
                 self.unlocked_this_run = False
                 self.gsm.commit_level_coins(self.total_coins, self.max_coins)
                 self.gsm.audio_manager.stop_music()
+                mode = self.gsm.current_mode
                 is_perfect = (self.gsm.run_coins_total > 0 and
                               self.gsm.run_coins_collected == self.gsm.run_coins_total)
-                if is_perfect:
-                    mode = self.gsm.current_mode
+                if mode == "hc_demon":
+                    self.gsm.save_hc_demon_complete()
+                    self.unlocked_this_run = True
+                    self.gsm.audio_manager.play_sound("finalwin")
+                elif mode == "hardcore":
+                    self.gsm.unlock_hc_demon()
+                    self.unlocked_this_run = True
+                    self.gsm.audio_manager.play_sound("finalwin")
+                elif is_perfect:
                     if mode == "normal":
                         self.gsm.unlock_rollin1()
                     elif mode == "demon":
                         self.gsm.unlock_hardcore()
-                    elif mode == "hardcore":
-                        raw = hmac.new(_HARDCORE_SECRET, b"HARDCORE_COMPLETE",
-                                       hashlib.sha256).digest()[:12]
-                        self.completion_code = base64.urlsafe_b64encode(raw).decode().rstrip("=")
                     self.unlocked_this_run = True
                     self.gsm.audio_manager.play_sound("finalwin")
                 else:
@@ -778,9 +844,33 @@ class LevelState(GameState):
             if self.gsm.input_handler.is_pressed(self.gsm.input_handler.BUTTON1):
                 self.gsm.run_coins_collected = 0
                 self.gsm.run_coins_total = 0
+                self.gsm.level_checkpoint = None
+                self.gsm._save_progress()
                 self.gsm.set_state(self.gsm.MENU_STATE)
             return True
         return False
+
+    def draw_win_overlay(self, surface, level_label="Level", extra_line=None, extra_color=(255, 255, 255)):
+        font_path = asset("fonts/upheavtt.ttf")
+        win_font = pygame.font.Font(font_path, 28)
+        win_text = win_font.render("LEVEL COMPLETE!", True, (255, 255, 0))
+        surface.blit(win_text, win_text.get_rect(center=(160, 85)))
+
+        level_pct = int(self.total_coins / self.max_coins * 100) if self.max_coins > 0 else 100
+        grand = self.gsm.grand_coin_total
+        overall_pct = int(self.gsm.run_coins_collected / grand * 100) if grand > 0 else 0
+
+        stats = self.font.render(f"{level_label} ({level_pct}%),  Overall ({overall_pct}%)", True, (255, 220, 100))
+        surface.blit(stats, stats.get_rect(center=(160, 112)))
+
+        y_cont = 135
+        if extra_line:
+            extra_surf = self.font.render(extra_line, True, extra_color)
+            surface.blit(extra_surf, extra_surf.get_rect(center=(160, 128)))
+            y_cont = 148
+
+        cont = self.font.render("Press ENTER to continue", True, (180, 180, 180))
+        surface.blit(cont, cont.get_rect(center=(160, y_cont)))
 
     def check_death_condition(self):
         """Check if player died and start death screen"""
@@ -802,7 +892,7 @@ class LevelState(GameState):
             overlay.fill((0, 0, 0))
             surface.blit(overlay, (0, 0))
 
-            font_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../assets/fonts/upheavtt.ttf"))
+            font_path = asset("fonts/upheavtt.ttf")
             death_font = pygame.font.Font(font_path, 48)
             death_text = death_font.render("YOU DIED!", True, (255, 0, 0))
             death_rect = death_text.get_rect(center=(160, 120))
