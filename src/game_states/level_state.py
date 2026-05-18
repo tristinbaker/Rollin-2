@@ -743,6 +743,14 @@ class LevelState(GameState):
 
     def handle_player_input(self):
         """Handle common player input"""
+        if self.has_won:
+            self.player.set_left(False)
+            self.player.set_right(False)
+            self.player.set_up(False)
+            self.player.set_down(False)
+            self.player.set_jumping(False)
+            self.player.set_gliding(False)
+            return
         input_handler = self.gsm.input_handler
         self.player.set_left(input_handler.is_down(input_handler.LEFT) or input_handler.is_down(input_handler.A))
         self.player.set_right(input_handler.is_down(input_handler.RIGHT) or input_handler.is_down(input_handler.D))
