@@ -23,4 +23,4 @@ There's more to find beyond the first playthrough. Keep playing.
 ## Credits
 
 Original Java version: Tristin Baker, circa 2015  
-Python remake and expansion: Tristin Baker, 2025
+Sequel: Tristin Baker, 2025
